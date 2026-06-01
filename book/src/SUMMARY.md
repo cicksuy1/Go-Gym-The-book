@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](introduction.md)
+[The TDD Cycle](tdd.md)
 
 ---
 
@@ -13,8 +14,8 @@
 # Part 1 — Go Fundamentals
 
 - [1 · Integers](integers.md)
-- [2 · Iteration]()
-- [3 · Arrays & slices]()
+- [2 · Iteration](iteration.md)
+- [3 · Arrays & slices](arrays.md)
 - [4 · Structs, methods & interfaces]()
 - [5 · Pointers & errors]()
 - [6 · Maps]()

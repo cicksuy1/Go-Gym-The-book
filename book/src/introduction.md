@@ -19,7 +19,7 @@ at a time.
 5. **Real-code peek** — see the concept live in real Go code (e.g. the standard library).
 
 Each chapter's text is the same `.md` that lives next to its exercise code in
-`go-gym/<module>/<module>.md` — so the book and the practice never drift apart.
+`<module>/<module>.md` (at the repo root) — so the book and the practice never drift apart.
 
 ## Anatomy of a chapter (the standard)
 

@@ -6,7 +6,8 @@ standard so humans and agents agree.
 
 ## A chapter is a folder
 
-Each module lives in `go-gym/<slug>/` and ships four files:
+Each module is a folder named by its `<slug>` at the **repository root** (the repo root is the Go module —
+see `go.mod`) and ships four files:
 
 | File | Build tag | Purpose |
 |------|-----------|---------|
