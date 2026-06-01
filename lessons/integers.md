@@ -7,7 +7,7 @@
 **What you'll build:** a one-line `Add` function — and around it, the four ideas that the rest of Go
 is made of.
 
-**Files for this chapter:** `integers.go` (you fix this) · `integers_test.go` (written for you).
+**Files for this chapter:** `exercises/integers/integers.go` (you fix this) · `exercises/integers/integers_test.go` (written for you).
 
 ---
 
@@ -277,7 +277,7 @@ func Add(x, y int) int {
 
 1. Run the tests and **watch them fail** (this is RED — it's supposed to happen):
    ```text
-   go test ./integers/ -v
+   go test ./exercises/integers/ -v
    ```
    *(run it from the `go-gym` folder)*
 2. Fix the one line so `Add` actually adds.
@@ -327,7 +327,7 @@ because real code cares about them — the "a type is a promise" idea you just m
   (**RED → GREEN → REFACTOR**).
 - **Example functions** are tests and documentation at once.
 
-✅ **Done when:** `go test ./integers/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/integers/` is GREEN and you can answer the four recall questions.
 
 **Next:** Chapter 2 — *Iteration*, where a single keyword (`for`) is Go's *only* loop, and we meet
 benchmarks.

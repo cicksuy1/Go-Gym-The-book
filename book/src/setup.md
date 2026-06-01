@@ -1,1 +1,1 @@
-{{#include ../../setup/setup.md}}
+{{#include ../../lessons/setup.md}}

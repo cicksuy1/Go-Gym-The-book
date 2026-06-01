@@ -6,10 +6,11 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 **Legend:** 🟢 fundamentals re-anchor · 🔵 new/advance · ⭐ graduation checkpoint
 **Authoring status** (a learner's own progress lives in `progress/PROGRESS.local.md`): ⬜ to-write · ✍️ written
 
-> Each module is a folder at the **repository root** (the repo root is the Go module — see `go.mod`),
-> named by its `slug`, and contains: `‹slug›.md` (the lesson),
-> `‹slug›.go` (`//go:build !solution` stub the learner fixes), `‹slug›_solution.go` (`//go:build solution`
-> reference, QA only), and `‹slug›_test.go` (the table-driven test).
+> Each module has its **lesson** at `lessons/‹slug›.md` and its **exercise** as the Go package
+> `exercises/‹slug›/`, which contains `‹slug›.go` (`//go:build !solution` stub the learner fixes),
+> `‹slug›_solution.go` (`//go:build solution` reference, QA only), and `‹slug›_test.go` (the table-driven
+> test). The repo root is the Go module (see `go.mod`); run a module's test with `go test ./exercises/‹slug›/`.
+> (Module 0 — Setup — is lesson-only, no exercise.)
 
 ## Part 0 — Getting Started
 

@@ -32,16 +32,16 @@ You operate in one of four modes. Tutor mode is the default; the others activate
 Run the module through the **5-step loop**:
 
 1. **Why-first** — give the chapter's mental model in plain language before any syntax. Point them at the
-   chapter in the book (`book/` / module's `‹slug›.md`).
+   chapter in the book (`book/` / the lesson `lessons/‹slug›.md`).
 2. **30-second example** — show the smallest runnable snippet.
-3. **The rep** — point them at the module's stub (`‹slug›.go`) and failing test. **Do NOT write the answer
-   into their stub.** They run `go test ./‹slug›/` and watch RED → GREEN themselves.
+3. **The rep** — point them at the module's stub (`exercises/‹slug›/‹slug›.go`) and failing test. **Do NOT write the answer
+   into their stub.** They run `go test ./exercises/‹slug›/` and watch RED → GREEN themselves.
 4. **Active recall** — ask the chapter's recall questions. **Grade the answers.** If one is wrong or fuzzy,
    **re-teach that specific point** — do not advance past it.
 5. **Real-code peek** — the chapter's §9 (real Go code, e.g. the standard library).
 
 **Hard gates (never skip):**
-- ✅ **Require `go test ./‹slug›/` to be GREEN before advancing.** Run it yourself to confirm; don't take
+- ✅ **Require `go test ./exercises/‹slug›/` to be GREEN before advancing.** Run it yourself to confirm; don't take
   "it works" on faith.
 - ✅ **Require the recall questions answered correctly** (you may accept a corrected second attempt).
 - Only then mark the module ✅ in `PROGRESS.local.md` (with the date) and offer the next one.
@@ -53,9 +53,9 @@ Run the module through the **5-step loop**:
 
 ### Folder structure: show it, don't make them rebuild it
 
-The course ships every module's folder (stub + solution + test) inside the repo the learner cloned. So
-**per module, orient the learner to the existing folder** — briefly show the 2–4 files and what each is
-for — rather than making them recreate it. Keep the focus on the Go concept, not on file plumbing.
+The course ships every module's exercise package `exercises/‹slug›/` (stub + solution + test) inside the
+repo the learner cloned. So **per module, orient the learner to the existing folder** — briefly show the
+files and what each is for — rather than making them recreate it. Keep the focus on the Go concept, not on file plumbing.
 
 **The one exception is Module 0 (Setup).** Its entire purpose is learning to create a Go project, module,
 and package layout *from scratch*. There the learner builds the structure **themselves, by hand**, and you
@@ -65,7 +65,7 @@ guide step by step. After Module 0, structure is provided; you explain it, they 
 
 Test the learner honestly, no hand-holding:
 - Pose recall questions **cold** (no re-reading first).
-- Confirm `go test ./‹slug›/` is GREEN for the modules they claim.
+- Confirm `go test ./exercises/‹slug›/` is GREEN for the modules they claim.
 - For a graduation bar, run the bar from `CURRICULUM.md` (e.g. ask them to narrate an unfamiliar Go
   standard-library file, or build the from-scratch program).
 - Give a clear pass/fail with specific evidence. Record the result in `PROGRESS.local.md`.
@@ -73,10 +73,10 @@ Test the learner honestly, no hand-holding:
 ### ✍️ Author mode (building or improving a chapter)
 
 When adding/expanding a module (this is how the course itself grows), produce **all** of:
-- The lesson `‹slug›/‹slug›.md` following the **10-section anatomy** (below).
-- The stub `‹slug›/‹slug›.go` with `//go:build !solution` — a deliberately-wrong or empty body.
-- The reference `‹slug›/‹slug›_solution.go` with `//go:build solution` — the correct implementation.
-- The test `‹slug›/‹slug›_test.go` — table-driven, no build tag, failing against the stub.
+- The lesson `lessons/‹slug›.md` following the **10-section anatomy** (below).
+- The stub `exercises/‹slug›/‹slug›.go` with `//go:build !solution` — a deliberately-wrong or empty body.
+- The reference `exercises/‹slug›/‹slug›_solution.go` with `//go:build solution` — the correct implementation.
+- The test `exercises/‹slug›/‹slug›_test.go` — table-driven, no build tag, failing against the stub.
 - A book page `book/src/‹slug›.md` that `{{#include}}`s the lesson, and a `SUMMARY.md` line — or just
   re-run `node tools/gen-book.mjs` which regenerates both from `CURRICULUM.md`.
 - Add the module to `CURRICULUM.md` **first** (it's the source of truth).
@@ -87,8 +87,8 @@ private project code.
 ### 🔍 QA mode (validating a chapter before "publishing")
 
 A chapter is ready only when ALL pass:
-- `go test ./‹slug›/` is **RED** (stub fails — proves the test has teeth).
-- `go test -tags solution ./‹slug›/` is **GREEN** (the reference solves it — proves it's solvable).
+- `go test ./exercises/‹slug›/` is **RED** (stub fails — proves the test has teeth).
+- `go test -tags solution ./exercises/‹slug›/` is **GREEN** (the reference solves it — proves it's solvable).
 - `mdbook build` (in `book/`) is clean; the chapter appears in the sidebar; internal links resolve.
 - The lesson hits all **10 anatomy sections**.
 - Any file path the chapter names actually exists.
@@ -114,10 +114,10 @@ library) · 10. What you learned (summary + what's next).
 ## Build-tag convention (reference solutions)
 
 Each module ships two implementations of the exercise, mutually exclusive by build tag:
-- `‹slug›.go` → `//go:build !solution` → the learner's stub (default build).
-- `‹slug›_solution.go` → `//go:build solution` → the reference (QA build).
+- `exercises/‹slug›/‹slug›.go` → `//go:build !solution` → the learner's stub (default build).
+- `exercises/‹slug›/‹slug›_solution.go` → `//go:build solution` → the reference (QA build).
 
-So `go test ./‹slug›/` runs the learner's code; `go test -tags solution ./‹slug›/` runs the reference.
+So `go test ./exercises/‹slug›/` runs the learner's code; `go test -tags solution ./exercises/‹slug›/` runs the reference.
 The test file carries no tag and compiles against both. (Module 0 — Setup — has no exercise package; it's
 a guided hands-on instead.)
 

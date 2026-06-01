@@ -1,1 +1,1 @@
-{{#include ../../integers/integers.md}}
+{{#include ../../lessons/integers.md}}

@@ -4,21 +4,21 @@ Thanks for helping make Go approachable! Most contributions are **new or improve
 is designed so an AI agent (in *Author mode*, see `AGENTS.md`) does the heavy lifting — but here's the
 standard so humans and agents agree.
 
-## A chapter is a folder
+## A chapter = a lesson + an exercise
 
-Each module is a folder named by its `<slug>` at the **repository root** (the repo root is the Go module —
-see `go.mod`) and ships four files:
+Each module's **lesson** lives at `lessons/<slug>.md`, and its **exercise** is the Go package
+`exercises/<slug>/` (the repo root is the Go module — see `go.mod`). Together they ship four files:
 
 | File | Build tag | Purpose |
 |------|-----------|---------|
-| `<slug>.md` | — | the lesson (the **10-section anatomy** below) |
-| `<slug>.go` | `//go:build !solution` | the **stub** the learner fixes (wrong/empty on purpose) |
-| `<slug>_solution.go` | `//go:build solution` | the **reference solution** (QA only) |
-| `<slug>_test.go` | — | the **table-driven test** (fails against the stub) |
+| `lessons/<slug>.md` | — | the lesson (the **10-section anatomy** below) |
+| `exercises/<slug>/<slug>.go` | `//go:build !solution` | the **stub** the learner fixes (wrong/empty on purpose) |
+| `exercises/<slug>/<slug>_solution.go` | `//go:build solution` | the **reference solution** (QA only) |
+| `exercises/<slug>/<slug>_test.go` | — | the **table-driven test** (fails against the stub) |
 
 The two build-tagged `.go` files are mutually exclusive, so `Add` (etc.) is never declared twice:
-- `go test ./<slug>/` compiles the **stub** → should be **RED**.
-- `go test -tags solution ./<slug>/` compiles the **reference** → should be **GREEN**.
+- `go test ./exercises/<slug>/` compiles the **stub** → should be **RED**.
+- `go test -tags solution ./exercises/<slug>/` compiles the **reference** → should be **GREEN**.
 
 (Module 0 — Setup — is the exception: it's a guided hands-on with no exercise package.)
 
@@ -34,14 +34,14 @@ Voice: warm, why-first, Rust-Book style. No terse bullet-dumps.
 ## Steps to add a module
 
 1. **Add it to `CURRICULUM.md` first** (number, title, `slug`, kind). That file is the source of truth.
-2. Create the folder + four files above (copy `integers/` as the template).
+2. Create the lesson + exercise files above (copy `lessons/integers.md` and `exercises/integers/` as the template).
 3. Run `node tools/gen-book.mjs` to wire it into the book sidebar.
 4. Self-check with the QA checklist below.
 
 ## QA checklist (must all pass before a PR)
 
-- [ ] `go test ./<slug>/` is **RED** (stub fails → the test has teeth).
-- [ ] `go test -tags solution ./<slug>/` is **GREEN** (reference solves it → it's solvable).
+- [ ] `go test ./exercises/<slug>/` is **RED** (stub fails → the test has teeth).
+- [ ] `go test -tags solution ./exercises/<slug>/` is **GREEN** (reference solves it → it's solvable).
 - [ ] `mdbook build book` is clean; the chapter shows in the sidebar; links resolve.
 - [ ] The lesson hits all **10 anatomy sections**.
 - [ ] **Standalone:** the chapter teaches with Go + the standard library only — no external or private

@@ -8,7 +8,7 @@
 **What you'll build:** `Sum` — add up a slice of numbers — and around it, the model of how Go's
 collections actually work.
 
-**Files for this chapter:** `arrays.go` (you fix this) · `arrays_test.go` (written for you).
+**Files for this chapter:** `exercises/arrays/arrays.go` (you fix this) · `exercises/arrays/arrays_test.go` (written for you).
 
 ---
 
@@ -146,7 +146,7 @@ func Sum(numbers []int) int {
 }
 ```
 
-1. Watch it fail (RED): `go test ./arrays/ -v`
+1. Watch it fail (RED): `go test ./exercises/arrays/ -v`
 2. Replace the body: start a running total at `0`, `range` over `numbers`, add each one, return it.
 3. Run again → **GREEN**.
 
@@ -186,7 +186,7 @@ the model you just learned — `slices.Contains`, `slices.Index`, `slices.Sort`,
 - Slicing **shares** the backing array — mutating one view can change another.
 - You **can't `==` slices**; use `slices.Equal` (or `reflect.DeepEqual`).
 
-✅ **Done when:** `go test ./arrays/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/arrays/` is GREEN and you can answer the four recall questions.
 
 **Next:** Chapter 4 — *Structs, methods & interfaces*, where we give our data a shape and our types
 behaviour — the heart of how Go programs are organized.

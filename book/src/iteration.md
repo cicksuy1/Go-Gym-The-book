@@ -1,1 +1,1 @@
-{{#include ../../iteration/iteration.md}}
+{{#include ../../lessons/iteration.md}}
