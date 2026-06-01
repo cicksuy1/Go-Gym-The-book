@@ -29,7 +29,9 @@ the traps) · 5. Worked runnable code (show output) · 6. Prove it with a test (
 way) · 7. 🏋️ Your rep (RED→GREEN + stretch goals) · 8. 🧠 Active recall (no-peek questions) · 9. 🔍 Real
 code in the wild (real Go code, e.g. the standard library) · 10. What you learned + what's next.
 
-Voice: warm, why-first, Rust-Book style. No terse bullet-dumps.
+Voice: warm, why-first, Rust-Book style. No terse bullet-dumps. **Write for a generic public reader:**
+instructional "you" is good ("you'll build…"), but never attribute a personal history/motive/goal to the
+reader ("you said you wanted…", "the thing you were missing") or reference private project context.
 
 ## Steps to add a module
 
@@ -46,6 +48,8 @@ Voice: warm, why-first, Rust-Book style. No terse bullet-dumps.
 - [ ] The lesson hits all **10 anatomy sections**.
 - [ ] **Standalone:** the chapter teaches with Go + the standard library only — no external or private
       project code.
+- [ ] **Generic voice:** no reader-personal history/motive ("you said you wanted…") and no private-context
+      references (real people, the author's other projects, "like we discussed").
 
 ## Code style
 

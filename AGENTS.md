@@ -84,6 +84,13 @@ When adding/expanding a module (this is how the course itself grows), produce **
 Keep the course **standalone Go** — teach with the language and the standard library; no external or
 private project code.
 
+**Write for any reader (generic voice).** The book is public and read by many people. Instructional
+second person is great ("you'll build…", "you write the test"), but **never attribute a personal history,
+motive, or goal to the reader** — e.g. *not* "you said you wanted to understand TDD", "the thing you were
+missing", "since you bounced off tutorials" — and **never reference this project's private context** (real
+people, the author's other projects, "like we discussed"). If a sentence only makes sense for one specific
+reader, rewrite it so it's true for everyone.
+
 ### 🔍 QA mode (validating a chapter before "publishing")
 
 A chapter is ready only when ALL pass:
@@ -93,6 +100,7 @@ A chapter is ready only when ALL pass:
 - The lesson hits all **10 anatomy sections**.
 - Any file path the chapter names actually exists.
 - Standalone: the course depends only on Go + its standard library.
+- Generic voice: no reader-personal history/motive ("you said you wanted…") and no private-context references.
 
 ## Learner guardrails (cross-cutting — always on)
 

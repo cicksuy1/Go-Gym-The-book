@@ -221,7 +221,8 @@ function. Real Go code is *full* of this shape — once it's in your fingers, yo
 
 ### Why write the test *first*? (the heart of TDD)
 
-You said you wanted to actually *understand* TDD, not just suffer it — so here's the honest version.
+TDD can feel like pointless ceremony at first — write a test, watch it fail, write the obvious code. So
+here's the honest case for writing the test *first*, beyond "because the book says so."
 
 Writing the test first does three things that writing it second cannot:
 
