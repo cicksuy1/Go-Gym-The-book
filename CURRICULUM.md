@@ -6,7 +6,8 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 **Legend:** 🟢 fundamentals re-anchor · 🔵 new/advance · ⭐ graduation checkpoint
 **Authoring status** (a learner's own progress lives in `progress/PROGRESS.local.md`): ⬜ to-write · ✍️ written
 
-> Each module is a folder under `go-gym/` named by its `slug` and contains: `‹slug›.md` (the lesson),
+> Each module is a folder at the **repository root** (the repo root is the Go module — see `go.mod`),
+> named by its `slug`, and contains: `‹slug›.md` (the lesson),
 > `‹slug›.go` (`//go:build !solution` stub the learner fixes), `‹slug›_solution.go` (`//go:build solution`
 > reference, QA only), and `‹slug›_test.go` (the table-driven test).
 
@@ -21,7 +22,7 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 | # | Module | slug | kind | status |
 |---|--------|------|------|--------|
 | 1 | Integers | `integers` | 🟢 | ✍️ |
-| 2 | Iteration | `iteration` | 🟢 | ⬜ |
+| 2 | Iteration | `iteration` | 🟢 | ✍️ |
 | 3 | Arrays & slices | `arrays` | 🟢 | ⬜ |
 | 4 | Structs, methods & interfaces | `structs` | 🟢 | ⬜ |
 | 5 | Pointers & errors | `pointers` | 🟢 | ⬜ |

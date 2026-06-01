@@ -13,7 +13,7 @@
 # Part 1 — Go Fundamentals
 
 - [1 · Integers](integers.md)
-- [2 · Iteration]()
+- [2 · Iteration](iteration.md)
 - [3 · Arrays & slices]()
 - [4 · Structs, methods & interfaces]()
 - [5 · Pointers & errors]()
