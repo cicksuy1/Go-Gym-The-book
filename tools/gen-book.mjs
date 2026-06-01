@@ -35,6 +35,9 @@ let summary = '# Summary\n\n[Introduction](introduction.md)\n';
 const written = [];
 const srcDir = join(root, 'book', 'src');
 
+// Optional orientation prefix pages (hand-maintained in book/src, like introduction.md).
+if (existsSync(join(srcDir, 'tdd.md'))) summary += '[The TDD Cycle](tdd.md)\n';
+
 for (const p of parts) {
   summary += `\n---\n\n# ${p.title}\n\n`;
   for (const mod of p.modules) {
