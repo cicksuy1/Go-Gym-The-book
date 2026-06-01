@@ -23,7 +23,7 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 |---|--------|------|------|--------|
 | 1 | Integers | `integers` | 🟢 | ✍️ |
 | 2 | Iteration | `iteration` | 🟢 | ✍️ |
-| 3 | Arrays & slices | `arrays` | 🟢 | ⬜ |
+| 3 | Arrays & slices | `arrays` | 🟢 | ✍️ |
 | 4 | Structs, methods & interfaces | `structs` | 🟢 | ⬜ |
 | 5 | Pointers & errors | `pointers` | 🟢 | ⬜ |
 | 6 | Maps | `maps` | 🟢 | ⬜ |
