@@ -1,48 +1,64 @@
-# The Go Gym Book
+# The Go Gym
 
-Your own Go course — one runnable idea per chapter, every concept nailed down with a test you write
-yourself.
+**Learn Go by doing — one runnable idea per chapter, each one nailed down with a test you write yourself.**
 
-It draws on two inspirations: the **TDD rigor** of [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/),
-and the **why-first, mental-model storytelling** of [the **Rust Book**](https://doc.rust-lang.org/book/) —
-combined into something that's its own thing.
+This is a hands-on Go course you take *with an AI tutor*. Every chapter is short and why-first: you read
+the mental model, make a single failing test pass, then get quizzed on what just clicked. The tutor only
+moves you on once you've genuinely got it. No passive video-watching, no terse walls of code — you learn
+by building, with something checking your work the whole way.
 
-This book is served with **mdBook** (the same engine that builds the Rust Book) and grows one chapter
-at a time.
+## Two inspirations
 
-## How each chapter works (the 5-step loop)
+The Go Gym borrows from the best of two worlds:
 
-1. **Why-first** — what the feature is *for*, and the mental picture.
-2. **30-second example** — a tiny runnable snippet.
-3. **Your rep** — a failing test you fix (RED → GREEN) in the module's folder.
-4. **Active recall** — answer the questions without peeking. *This is the retention fix.*
-5. **Real-code peek** — see the concept live in real Go code (e.g. the standard library).
+- The **test-driven rigor** of [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/) —
+  every concept earns its keep by being proven with a test.
+- The **why-first, mental-model storytelling** of [the Rust Book](https://doc.rust-lang.org/book/) — the
+  *why* and the picture come before any syntax.
 
-Each chapter's text is the same `.md` that lives next to its exercise code in
-`<module>/<module>.md` (at the repo root) — so the book and the practice never drift apart.
+It's served with **mdBook** (the same engine that builds the Rust Book) and grows one chapter at a time.
 
-## Anatomy of a chapter (the standard)
+## How a chapter works
 
-Every chapter is full-length and follows the same skeleton, so you always know where you are:
+Every chapter walks the same loop, so you always know where you are:
 
-1. **A hook** — why this topic secretly matters.
-2. **Where we're going** — the concrete skills you'll have by the end.
-3. **The big idea** — the mental model, in plain language, *before* any syntax.
-4. **The details** — the type/feature explored properly, with the traps called out.
-5. **Worked code** — small, runnable, with the output shown.
-6. **Prove it with a test** — the TDD rep, and *why* the test is shaped that way.
-7. **🏋️ Your rep** — RED → GREEN, plus optional stretch goals.
-8. **🧠 Active recall** — questions to answer without peeking (the retention fix).
-9. **🔍 Real code in the wild** — the same idea spotted in real Go code, e.g. the standard library.
-10. **What you learned** — a tight summary + what's next.
+1. **Why-first** — what the feature is *for*, and the mental picture, before any code.
+2. **A tiny runnable example** — small, real, with the output shown.
+3. **Your rep** — a failing test you make pass (**RED → GREEN**). This is where the learning lands.
+4. **Active recall** — answer a few questions without peeking. *This is the retention fix.*
+5. **Real code in the wild** — spot the same idea live in real Go, usually the standard library.
 
-## The three graduation bars (the finish line, in order)
+That loop expands into a fixed **10-section anatomy** (a hook, where we're going, the big idea, the
+details and traps, worked code, prove-it-with-a-test, your rep, active recall, real-code-in-the-wild, and
+a what-you-learned summary) — so no matter which chapter you open, it feels the same.
 
-- ⭐ **Bar 1 — Build from scratch:** a worker-goroutine + channel + `select`/timeout program, with passing tests, from a blank file.
-- ⭐ **Bar 2 — Read real code:** open an unfamiliar Go **standard-library** file cold and narrate every line.
-- ⭐ **Bar 3 — Ship something:** build a small but complete app, end to end.
+The prose and the practice live side by side but in separate places: each chapter's text is a markdown
+file in **`lessons/<slug>.md`**, and its exercise is a Go package in **`exercises/<slug>/`** (a failing
+stub you fix, a reference solution, and the test). A small generator, `tools/gen-book.mjs`, wires the
+lessons into this book — so the book you're reading and the code you run never drift apart.
+
+## The roadmap
+
+The course is five Parts. The sidebar shows every chapter in order: written ones are links, upcoming ones
+are greyed-out drafts, so the whole journey is always visible.
+
+- **Part 0 — Getting Started** — install Go, and learn how a project and its packages fit together.
+- **Part 1 — Go Fundamentals** — the core language, re-anchored: integers, iteration, slices, structs,
+  interfaces, pointers, maps, dependency injection, mocking, concurrency, generics, and more.
+- **Part 2 — Testing Fundamentals** — acceptance tests, working without mocks, and a refactoring discipline.
+- **Part 3 — Build an Application** — put it together into a small but complete app, end to end.
+- **Part 4 — Q&A + Meta** — the sharper corners and the anti-patterns to avoid.
+
+## The three graduation bars
+
+The finish line isn't "watched every chapter" — it's three things you can *do*, in order:
+
+- ⭐ **Build from scratch** — from a blank file, write a worker-goroutine + channel + `select`/timeout
+  program, with passing tests, unaided.
+- ⭐ **Read real code** — open an unfamiliar Go **standard-library** file cold and narrate every line.
+- ⭐ **Ship something** — build a small but complete app, end to end.
 
 ## Where am I?
 
-Your progress lives in `progress/PROGRESS.local.md`, which your AI keeps updated. The full roadmap is in
-the sidebar: written chapters are links, upcoming ones are greyed-out drafts.
+Your progress lives in `progress/PROGRESS.local.md`, which your AI keeps updated as you go — so you can
+close the laptop and pick up exactly where you left off.

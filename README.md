@@ -28,10 +28,30 @@ storytelling** of [the Rust Book](https://doc.rust-lang.org/book/).
 Every module follows the same loop: **why-first → tiny example → make the test green → recall quiz →
 real code in the wild.**
 
+## Status
+
+The course ships in five Parts. Progress so far:
+
+- [x] **Part 0 — Getting Started** — install Go, project & package structure
+- [x] **Part 1 — Go Fundamentals** — 19 chapters (integers → generics) ✅ live
+- [ ] **Part 2 — Testing Fundamentals**
+- [ ] **Part 3 — Build an Application**
+- [ ] **Part 4 — Q&A + Meta**
+
+The full per-chapter list and statuses live in **[`CURRICULUM.md`](CURRICULUM.md)**.
+
 ## Quickstart
 
 **Prerequisites:** [Go](https://go.dev/dl/) 1.26+, an AI coding agent, and (optional, to read the book in a
 browser) [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html).
+
+mdBook is only needed if you want to read the book locally — the course itself runs through your AI agent
+and `go test`. Install it whichever way suits you:
+
+```bash
+cargo install mdbook    # via the Rust toolchain (any platform)
+winget install mdBook   # Windows, no Rust needed
+```
 
 ```bash
 # 1. Get the course
