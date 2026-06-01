@@ -2,6 +2,8 @@
 
 **Learn Go by doing — with an AI tutor that actually teaches.**
 
+📖 **[Read the book online →](https://cicksuy1.github.io/Go-Gym-The-book/)**
+
 The Go Gym is an open-source Go course you take *with an AI assistant*. You read a short, why-first
 chapter, then make a failing test pass. Your AI explains the idea, watches you do the rep, tests your
 memory, and only moves on when you've genuinely got it. No passive video-watching, no terse walls of code.
@@ -18,7 +20,7 @@ storytelling** of [the Rust Book](https://doc.rust-lang.org/book/).
 
 ## How it works — three layers
 
-1. **A book** (`book/`, built with [mdBook](https://rust-lang.github.io/mdBook/)) — one why-first chapter per concept.
+1. **A book** ([read online](https://cicksuy1.github.io/Go-Gym-The-book/) — `book/`, built with [mdBook](https://rust-lang.github.io/mdBook/)) — one why-first chapter per concept.
 2. **Exercises** (one Go package per module) — each ships a failing test you make pass.
 3. **An AI conductor** (`AGENTS.md`) — runs you through it: explains, gates on real `go test` results,
    quizzes you, tracks progress, and keeps the pace sane so you don't burn out.
