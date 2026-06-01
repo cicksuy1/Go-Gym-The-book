@@ -1,0 +1,19 @@
+[book]
+title = "The Go Gym Book"
+authors = ["Ben"]
+description = "An original Go course — inspired by Learn Go with Tests and the Rust Book."
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "ayu"
+smart-punctuation = true
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true
+limit-results = 20
