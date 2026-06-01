@@ -1,48 +1,56 @@
-# The Go Gym Book
+# The Go Gym
 
-Your own Go course — one runnable idea per chapter, every concept nailed down with a test you write
-yourself.
+Most Go tutorials pour syntax over you and hope it sticks. It rarely does — you watch, you nod, and a
+week later the slice tricks are gone. The Go Gym is built the opposite way: you learn one idea at a time,
+and you *earn* each one by turning a failing test green with your own hands. An AI tutor works through it
+beside you — explaining the *why* before the *how*, watching you do the rep, and refusing to move on until
+the idea is genuinely yours. No videos to half-watch, no walls of code to skim. You read the picture
+first, then you build.
 
-It draws on two inspirations: the **TDD rigor** of [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/),
-and the **why-first, mental-model storytelling** of [the **Rust Book**](https://doc.rust-lang.org/book/) —
-combined into something that's its own thing.
+## What you'll be able to do
 
-This book is served with **mdBook** (the same engine that builds the Rust Book) and grows one chapter
-at a time.
+The finish line isn't "read every chapter." It's three things you can *do* — earned in order:
 
-## How each chapter works (the 5-step loop)
+- ⭐ **Build from scratch.** From a blank file, write a worker-goroutine + channel + `select`/timeout
+  program, with passing tests, unaided.
+- ⭐ **Read real code.** Open an unfamiliar file from Go's own standard library, cold, and narrate every
+  line.
+- ⭐ **Ship something.** Build a small but complete app, end to end.
 
-1. **Why-first** — what the feature is *for*, and the mental picture.
-2. **30-second example** — a tiny runnable snippet.
-3. **Your rep** — a failing test you fix (RED → GREEN) in the module's folder.
-4. **Active recall** — answer the questions without peeking. *This is the retention fix.*
-5. **Real-code peek** — see the concept live in real Go code (e.g. the standard library).
+Everything in the course is aimed at those three moments.
 
-Each chapter's text is the same `.md` that lives next to its exercise code in
-`<module>/<module>.md` (at the repo root) — so the book and the practice never drift apart.
+## How a chapter works
 
-## Anatomy of a chapter (the standard)
+Every chapter walks the same short loop, so you always know where you are. It opens with the *why* — what
+a feature is for and the mental picture behind it — then shows a tiny runnable example. From there you do
+**your rep**: a failing test you make pass, red to green, in real Go code. Once it's green, the tutor
+quizzes you from memory (this is the part that makes it actually stick), and finally points you at the same
+idea living in the wild — usually somewhere in the standard library, so you see it's not a toy.
 
-Every chapter is full-length and follows the same skeleton, so you always know where you are:
+That's the rhythm of all of them: **why first, then a rep, then recall, then the real thing.** Open any
+chapter and it feels the same.
 
-1. **A hook** — why this topic secretly matters.
-2. **Where we're going** — the concrete skills you'll have by the end.
-3. **The big idea** — the mental model, in plain language, *before* any syntax.
-4. **The details** — the type/feature explored properly, with the traps called out.
-5. **Worked code** — small, runnable, with the output shown.
-6. **Prove it with a test** — the TDD rep, and *why* the test is shaped that way.
-7. **🏋️ Your rep** — RED → GREEN, plus optional stretch goals.
-8. **🧠 Active recall** — questions to answer without peeking (the retention fix).
-9. **🔍 Real code in the wild** — the same idea spotted in real Go code, e.g. the standard library.
-10. **What you learned** — a tight summary + what's next.
+## Where it comes from
 
-## The three graduation bars (the finish line, in order)
+The Go Gym stands on two shoulders. From [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/)
+it takes a simple discipline: no idea is "learned" until a test proves it. From
+[the Rust Book](https://doc.rust-lang.org/book/) it takes the belief that the *why* and the mental model
+come before any syntax — and the warmth to match. It's served with mdBook, the same engine that builds the
+Rust Book, and it grows one chapter at a time.
 
-- ⭐ **Bar 1 — Build from scratch:** a worker-goroutine + channel + `select`/timeout program, with passing tests, from a blank file.
-- ⭐ **Bar 2 — Read real code:** open an unfamiliar Go **standard-library** file cold and narrate every line.
-- ⭐ **Bar 3 — Ship something:** build a small but complete app, end to end.
+## The roadmap
+
+The course runs in five Parts, and the sidebar shows all of them at once — written chapters are links,
+upcoming ones are greyed-out drafts, so the whole road is always in view:
+
+- **Part 0 — Getting Started:** install Go and learn how a project and its packages fit together.
+- **Part 1 — Go Fundamentals:** the core language, properly re-anchored — from integers all the way to generics.
+- **Part 2 — Testing Fundamentals:** acceptance tests, working without mocks, and a refactoring discipline.
+- **Part 3 — Build an Application:** put it all together into a small but complete app.
+- **Part 4 — Q&A + Meta:** the sharper corners, and the anti-patterns worth avoiding.
 
 ## Where am I?
 
-Your progress lives in `progress/PROGRESS.local.md`, which your AI keeps updated. The full roadmap is in
-the sidebar: written chapters are links, upcoming ones are greyed-out drafts.
+Your progress lives in `progress/PROGRESS.local.md`, which your AI tutor keeps updated as you go — close
+the laptop and pick up exactly where you left off. When you're ready, turn the page to
+[The TDD Cycle](tdd.md) and start with Part 0.
