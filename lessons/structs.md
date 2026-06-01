@@ -198,9 +198,10 @@ The table itself stores both `Shape`s in the same slice and checks each one's `A
 
 ```go
 cases := []struct {
-	name string
-	shape Shape
-	wantArea, wantPerim float64
+	name      string
+	shape     Shape
+	wantArea  float64
+	wantPerim float64
 }{
 	{name: "rectangle", shape: Rectangle{Width: 12, Height: 6}, wantArea: 72, wantPerim: 36},
 	{name: "circle", shape: Circle{Radius: 10}, wantArea: 314.1592653589793, wantPerim: 62.83185307179586},
@@ -208,7 +209,8 @@ cases := []struct {
 ```
 
 Because the field is typed `Shape`, the test exercises the *interface*, not the concrete types — exactly
-the way real callers will use your code.
+the way real callers will use your code. (The test file also ships an `ExampleRectangle_Area` — the
+test-that-doubles-as-documentation trick from Chapter 1.)
 
 ---
 

@@ -315,8 +315,9 @@ You just learned the rule "if a method changes its receiver, use a pointer recei
 library lives by it. Open [`sync.Mutex`](https://pkg.go.dev/sync#Mutex): its methods are
 `func (m *Mutex) Lock()` and `func (m *Mutex) Unlock()` — **pointer receivers**, because locking has
 to flip state on the *one real* mutex, never a copy (in fact, copying a `Mutex` after use is a bug the
-`go vet` tool warns about). Same story with [`bytes.Buffer`](https://pkg.go.dev/bytes#Buffer): its
-`Write` takes `func (b *Buffer) Write(p []byte)` so the bytes accumulate in the actual buffer.
+`go vet` tool warns about). Same story with [`bytes.Buffer`](https://pkg.go.dev/bytes#Buffer): its `Write` method —
+`func (b *Buffer) Write(p []byte) (int, error)` — has a pointer receiver, so the bytes accumulate in the
+actual buffer.
 
 And the error half is everywhere too: [`io.EOF`](https://pkg.go.dev/io#EOF) is the canonical sentinel —
 `var EOF = errors.New("EOF")` — and idiomatic readers stop their loop with

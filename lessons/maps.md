@@ -114,8 +114,8 @@ for word, definition := range m {
 ```
 
 Go deliberately randomizes this so you never accidentally write code that depends on map order — because
-there is no order to depend on. If you need sorted output, pull the keys into a slice and sort them
-(`sort.Strings`, or collect with the `maps` package and sort). Never assume "the first one I added comes
+there is no order to depend on. If you need sorted output, pull the keys into a slice and sort them; the
+modern one-liner is `slices.Sorted(maps.Keys(m))` (Go 1.23+). Never assume "the first one I added comes
 out first." It won't.
 
 ### Maps are reference-like — no pointer needed to mutate
@@ -308,11 +308,11 @@ If any answer is fuzzy, scroll back up — that's the recall doing its job.
 
 ## 🔍 Real code in the wild
 
-Open the standard library's [`maps`](https://pkg.go.dev/maps) package (Go 1.21+). It's a toolbox built on
-exactly the model you just learned: `maps.Keys` and `maps.Values` hand you the keys/values of any
-`map[K]V`, `maps.Clone` makes a shallow copy, `maps.Equal` compares two maps. Every one of them takes a
-`map[K]V` and is generic over `K` and `V` — and because map order is random, `maps.Keys` returns an
-*iterator* you sort yourself when you want order. You now read those signatures fluently. The comma-ok
+Open the standard library's [`maps`](https://pkg.go.dev/maps) package. It's a toolbox built on exactly
+the model you just learned: `maps.Keys` and `maps.Values` give you the keys/values of any `map[K]V`,
+`maps.Clone` makes a shallow copy, `maps.Equal` compares two maps — all generic over `K` and `V`. Since
+**Go 1.23**, `maps.Keys` returns an *iterator* (map order is random, remember), so to get sorted keys you
+write `slices.Sorted(maps.Keys(m))`. You now read those signatures fluently. The comma-ok
 idiom you wrote in `Search` is the same one the standard library uses internally everywhere it asks "is
 this key present?"
 
