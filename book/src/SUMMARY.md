@@ -4,6 +4,12 @@
 
 ---
 
+# Part 0 — Getting Started
+
+- [0 · Setup: install Go, project & package structure](setup.md)
+
+---
+
 # Part 1 — Go Fundamentals
 
 - [1 · Integers](integers.md)
