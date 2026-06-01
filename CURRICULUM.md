@@ -6,10 +6,11 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 **Legend:** 🟢 fundamentals re-anchor · 🔵 new/advance · ⭐ graduation checkpoint
 **Authoring status** (a learner's own progress lives in `progress/PROGRESS.local.md`): ⬜ to-write · ✍️ written
 
-> Each module is a folder at the **repository root** (the repo root is the Go module — see `go.mod`),
-> named by its `slug`, and contains: `‹slug›.md` (the lesson),
-> `‹slug›.go` (`//go:build !solution` stub the learner fixes), `‹slug›_solution.go` (`//go:build solution`
-> reference, QA only), and `‹slug›_test.go` (the table-driven test).
+> Each module has its **lesson** at `lessons/‹slug›.md` and its **exercise** as the Go package
+> `exercises/‹slug›/`, which contains `‹slug›.go` (`//go:build !solution` stub the learner fixes),
+> `‹slug›_solution.go` (`//go:build solution` reference, QA only), and `‹slug›_test.go` (the table-driven
+> test). The repo root is the Go module (see `go.mod`); run a module's test with `go test ./exercises/‹slug›/`.
+> (Module 0 — Setup — is lesson-only, no exercise.)
 
 ## Part 0 — Getting Started
 
@@ -24,22 +25,22 @@ README, and `tools/gen-book.mjs` all follow this list. **To add a module, add it
 | 1 | Integers | `integers` | 🟢 | ✍️ |
 | 2 | Iteration | `iteration` | 🟢 | ✍️ |
 | 3 | Arrays & slices | `arrays` | 🟢 | ✍️ |
-| 4 | Structs, methods & interfaces | `structs` | 🟢 | ⬜ |
-| 5 | Pointers & errors | `pointers` | 🟢 | ⬜ |
-| 6 | Maps | `maps` | 🟢 | ⬜ |
-| 7 | Dependency Injection | `di` | 🟢 | ⬜ |
-| 8 | Mocking | `mocking` | 🟢 | ⬜ |
-| 9 | Concurrency | `concurrency` | 🔵 | ⬜ |
-| 10 | Select | `select` | 🔵 | ⬜ |
-| 11 | Reflection | `reflection` | 🔵 | ⬜ |
-| 12 | Sync | `sync` | 🔵 | ⬜ |
-| 13 | Context | `context` | 🔵 | ⬜ |
-| 14 | Property-based tests | `property` | 🔵 | ⬜ |
-| 15 | Maths | `maths` | 🔵 | ⬜ |
-| 16 | Reading files | `files` | 🔵 | ⬜ |
-| 17 | Templating | `templating` | 🔵 | ⬜ |
-| 18 | Generics | `generics` | 🔵 | ⬜ |
-| 19 | Revisiting arrays & slices with generics | `generics-revisit` | 🔵 | ⬜ |
+| 4 | Structs, methods & interfaces | `structs` | 🟢 | ✍️ |
+| 5 | Pointers & errors | `pointers` | 🟢 | ✍️ |
+| 6 | Maps | `maps` | 🟢 | ✍️ |
+| 7 | Dependency Injection | `di` | 🟢 | ✍️ |
+| 8 | Mocking | `mocking` | 🟢 | ✍️ |
+| 9 | Concurrency | `concurrency` | 🔵 | ✍️ |
+| 10 | Select | `select` | 🔵 | ✍️ |
+| 11 | Reflection | `reflection` | 🔵 | ✍️ |
+| 12 | Sync | `sync` | 🔵 | ✍️ |
+| 13 | Context | `context` | 🔵 | ✍️ |
+| 14 | Property-based tests | `property` | 🔵 | ✍️ |
+| 15 | Maths | `maths` | 🔵 | ✍️ |
+| 16 | Reading files | `files` | 🔵 | ✍️ |
+| 17 | Templating | `templating` | 🔵 | ✍️ |
+| 18 | Generics | `generics` | 🔵 | ✍️ |
+| 19 | Revisiting arrays & slices with generics | `generics-revisit` | 🔵 | ✍️ |
 
 ## Part 2 — Testing Fundamentals
 

@@ -259,10 +259,11 @@ exercise folders take over and you start the test-driven rhythm.
 
 ## 🔍 Real code in the wild — *this very course*
 
-Look at the course you're in right now. The `integers/` folder is a package (`package integers`) made of
-several `.go` files — `integers.go`, `integers_solution.go`, `integers_test.go` — all cooperating without
-importing each other, exactly like you just learned. The whole `go-gym` folder is one **module** (open its
-`go.mod`). You already understand the shape of the thing you're learning inside. That's the goal.
+Look at the course you're in right now. The `exercises/integers/` folder is a package (`package integers`)
+made of several `.go` files — `integers.go`, `integers_solution.go`, `integers_test.go` — all cooperating
+without importing each other, exactly like you just learned. The lesson you're reading lives separately in
+`lessons/integers.md`, and the whole repo is one **module** (open the `go.mod` at the root). You already
+understand the shape of the thing you're learning inside. That's the goal.
 
 ---
 

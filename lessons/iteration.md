@@ -8,7 +8,7 @@
 **What you'll build:** `Repeat` — a function that writes a string out N times — and on the way you'll meet
 all four shapes of `for`, plus your very first **benchmark**.
 
-**Files for this chapter:** `iteration.go` (you fix this) · `iteration_test.go` (written for you).
+**Files for this chapter:** `exercises/iteration/iteration.go` (you fix this) · `exercises/iteration/iteration_test.go` (written for you).
 
 ---
 
@@ -152,10 +152,10 @@ until the timing is stable) and reports **nanoseconds per operation**. You don't
 plain `go test` — you opt in:
 
 ```text
-go test -bench=. -tags solution ./iteration/
+go test -bench=. -tags solution ./exercises/iteration/
 ```
 
-> 🪟 **On Windows PowerShell**, quote the flag — `go test "-bench=." -tags solution ./iteration/` —
+> 🪟 **On Windows PowerShell**, quote the flag — `go test "-bench=." -tags solution ./exercises/iteration/` —
 > otherwise PowerShell splits the trailing dot off and the benchmark silently won't run.
 
 (We pass `-tags solution` here only so there's a *working* `Repeat` to measure while the stub is still
@@ -176,12 +176,12 @@ func Repeat(s string, count int) string {
 
 1. Run it and watch it fail (RED):
    ```text
-   go test ./iteration/ -v
+   go test ./exercises/iteration/ -v
    ```
 2. Replace the body with a `for` loop that builds up the answer.
 3. Run again → **GREEN**. Then, for fun, measure it:
    ```text
-   go test -bench=. ./iteration/
+   go test -bench=. ./exercises/iteration/
    ```
 
 Type it yourself. You're not looking for the "right answer" — you're growing the reflex.
@@ -221,7 +221,7 @@ standard library.
 - The Go 1.22+ **per-iteration loop variable** killed the classic capture bug — one less thing to fear.
 - A **benchmark** (`func BenchmarkX(b *testing.B)`, run with `go test -bench=.`) measures speed in ns/op.
 
-✅ **Done when:** `go test ./iteration/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/iteration/` is GREEN and you can answer the four recall questions.
 
 **Next:** Chapter 3 — *Arrays & slices*, where `range` earns its keep and we meet Go's most-used
 collection.

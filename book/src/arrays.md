@@ -1,1 +1,1 @@
-{{#include ../../arrays/arrays.md}}
+{{#include ../../lessons/arrays.md}}

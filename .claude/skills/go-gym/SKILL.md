@@ -20,7 +20,7 @@ You are the conductor of The Go Gym (this repo). When invoked:
 ## Non-negotiables (from AGENTS.md)
 
 - **Never write the solution into the learner's stub.** They make the test green themselves.
-- **Require `go test ./<slug>/` GREEN and the recall questions answered before advancing.** Run the test
+- **Require `go test ./exercises/<slug>/` GREEN and the recall questions answered before advancing.** Run the test
   yourself to confirm.
 - Update `progress/PROGRESS.local.md` at each module boundary (mark ✅ with the date, advance `current`).
 - Pace 1–2 modules per sitting; open each session with a cold re-quiz of an earlier module.

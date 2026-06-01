@@ -42,12 +42,12 @@ for (const p of parts) {
   summary += `\n---\n\n# ${p.title}\n\n`;
   for (const mod of p.modules) {
     const label = `${mod.n} · ${mod.title}`;
-    const lessonAbs = join(root, mod.slug, `${mod.slug}.md`);
+    const lessonAbs = join(root, 'lessons', `${mod.slug}.md`);
     if (!existsSync(lessonAbs)) {
       summary += `- [${label}]()\n`;            // draft: not written yet
       continue;
     }
-    writeFileSync(join(srcDir, `${mod.slug}.md`), `{{#include ../../${mod.slug}/${mod.slug}.md}}\n`);
+    writeFileSync(join(srcDir, `${mod.slug}.md`), `{{#include ../../lessons/${mod.slug}.md}}\n`);
     written.push(`${mod.slug}.md`);
     summary += `- [${label}](${mod.slug}.md)\n`;
   }
