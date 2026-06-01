@@ -14,7 +14,7 @@ func TestSum(t *testing.T) {
 	}{
 		{name: "a few numbers", in: []int{1, 2, 3}, want: 6},
 		{name: "empty slice is zero", in: []int{}, want: 0},
-		{name: "with negatives", in: []int{5, -2, -3}, want: 0},
+		{name: "with negatives", in: []int{5, -2, 4}, want: 7},
 	}
 
 	for _, c := range cases {

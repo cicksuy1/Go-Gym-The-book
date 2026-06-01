@@ -15,8 +15,8 @@ func TestGreet(t *testing.T) {
 		in   string
 		want string
 	}{
-		{name: "a name", in: "Chris", want: "Hello, Chris"},
-		{name: "another name", in: "Dolores", want: "Hello, Dolores"},
+		{name: "a name", in: "world", want: "Hello, world"},
+		{name: "another name", in: "Go", want: "Hello, Go"},
 		{name: "empty name", in: "", want: "Hello, "},
 	}
 
@@ -35,7 +35,7 @@ func TestGreet(t *testing.T) {
 
 func ExampleGreet() {
 	buffer := bytes.Buffer{}
-	Greet(&buffer, "Chris")
+	Greet(&buffer, "world")
 	fmt.Println(buffer.String())
-	// Output: Hello, Chris
+	// Output: Hello, world
 }

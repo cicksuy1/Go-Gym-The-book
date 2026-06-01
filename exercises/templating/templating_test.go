@@ -41,4 +41,9 @@ func TestRenderEscapes(t *testing.T) {
 	if strings.Contains(got, "<script>") {
 		t.Errorf("rendered HTML %q contains an unescaped <script> tag", got)
 	}
+	// Also assert the body IS present, but escaped — this gives the test teeth:
+	// an empty/stub Render would have neither a <script> tag nor the escaped form.
+	if !strings.Contains(got, "&lt;script&gt;") {
+		t.Errorf("rendered HTML %q does not contain the escaped body", got)
+	}
 }

@@ -148,14 +148,24 @@ hands it a `bytes.Buffer` — a writer you can read back — and checks the capt
 
 ```go
 func TestGreet(t *testing.T) {
-	buffer := bytes.Buffer{}
-	Greet(&buffer, "Chris")
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{name: "a name", in: "world", want: "Hello, world"},
+		{name: "another name", in: "Go", want: "Hello, Go"},
+		{name: "empty name", in: "", want: "Hello, "},
+	}
 
-	got := buffer.String()
-	want := "Hello, Chris"
-
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			buffer := bytes.Buffer{}
+			Greet(&buffer, c.in)
+			if got := buffer.String(); got != c.want {
+				t.Errorf("Greet(buffer, %q) wrote %q; want %q", c.in, got, c.want)
+			}
+		})
 	}
 }
 ```
@@ -171,7 +181,7 @@ because a dependency is hard-wired instead of handed in.
 ## 🏋️ Your rep — make it GREEN
 
 Right now `di.go` has an empty body on purpose — it writes nothing, so the test sees an empty string
-instead of `"Hello, Chris"` (that's the RED state):
+instead of `"Hello, world"` (that's the RED state):
 
 ```go
 func Greet(writer io.Writer, name string) {

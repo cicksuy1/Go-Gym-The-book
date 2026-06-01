@@ -153,8 +153,11 @@ cancellation:
 
 ```go
 func (s *CancellingStore) Fetch(ctx context.Context) (string, error) {
-	<-ctx.Done()              // block until cancelled
-	return "", ctx.Err()      // report why we stopped
+	<-ctx.Done() // block until cancelled
+	// Return NON-empty data alongside the error on purpose: a handler that
+	// ignores the error would wrongly write this — which is exactly what the
+	// test needs to catch (an empty string would hide the bug).
+	return "you should not see this", ctx.Err()
 }
 ```
 

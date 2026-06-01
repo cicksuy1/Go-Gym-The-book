@@ -83,12 +83,14 @@ func secondsInRadians(t time.Time) float64 {
 That looks odd, so read it carefully. There are 30 seconds in *half* a circle (`π`). So the angle is
 `π` divided by "how many half-circle-chunks fit before now." At 30 seconds: `30/30 = 1`, so `π/1 = π`.
 At 15 seconds: `30/15 = 2`, so `π/2`. It's the same as `float64(t.Second()) * (math.Pi / 30)` — just
-arranged to keep the arithmetic in integers as long as possible.
+written a different way. (Both are *float* arithmetic: `t.Second()` is converted to `float64` first, so
+nothing here is integer division.)
 
-> **Float division by zero doesn't panic.** At `0` seconds, `30 / 0` would crash for *integers* — but here
-> the inner division is happening in a context that produces `+Inf`, and `math.Pi / +Inf` is `0`. So the
-> 0-seconds case correctly gives `0` radians. (Go floats follow IEEE 754: divide by zero → ±Inf, not a
-> panic. Good to know it, surprising the first time you see it.)
+> **Float division by zero doesn't panic.** At `0` seconds you'd compute `30 / 0` — but because
+> `t.Second()` is wrapped in `float64(...)`, the whole expression is float arithmetic, and IEEE-754 floats
+> define `30.0 / 0.0` as `+Inf` (not a panic). Then `math.Pi / +Inf` is `0`, so the 0-seconds case
+> correctly gives `0` radians. (Integer division by zero *would* panic — floats don't. Surprising the
+> first time you see it.)
 
 Each hand builds on the one below:
 

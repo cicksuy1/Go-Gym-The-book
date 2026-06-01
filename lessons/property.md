@@ -121,8 +121,10 @@ assertion := func(arabic uint16) bool {
 quick.Check(assertion, &quick.Config{MaxCount: 1000})
 ```
 
-`MaxCount: 1000` asks `quick` to try a thousand random numbers. Every one must round-trip. If your table
-has a hole — say you forgot the `XL` row — `quick` will find a number that breaks and print it for you.
+`MaxCount: 1000` asks `quick` to try a thousand random numbers; the ones that fall inside our 1–3999 range
+must round-trip (the rest are skipped by that early `return true`). If your table has a hole — say you
+forgot the `XL` row — `quick` will find a number that breaks and print it for you. (Want *every* try to be
+in range instead of skipping most of them? The stretch goal below shows how to write a custom generator.)
 
 ---
 
