@@ -1,64 +1,56 @@
 # The Go Gym
 
-**Learn Go by doing — one runnable idea per chapter, each one nailed down with a test you write yourself.**
+Most Go tutorials pour syntax over you and hope it sticks. It rarely does — you watch, you nod, and a
+week later the slice tricks are gone. The Go Gym is built the opposite way: you learn one idea at a time,
+and you *earn* each one by turning a failing test green with your own hands. An AI tutor works through it
+beside you — explaining the *why* before the *how*, watching you do the rep, and refusing to move on until
+the idea is genuinely yours. No videos to half-watch, no walls of code to skim. You read the picture
+first, then you build.
 
-This is a hands-on Go course you take *with an AI tutor*. Every chapter is short and why-first: you read
-the mental model, make a single failing test pass, then get quizzed on what just clicked. The tutor only
-moves you on once you've genuinely got it. No passive video-watching, no terse walls of code — you learn
-by building, with something checking your work the whole way.
+## What you'll be able to do
 
-## Two inspirations
+The finish line isn't "read every chapter." It's three things you can *do* — earned in order:
 
-The Go Gym borrows from the best of two worlds:
+- ⭐ **Build from scratch.** From a blank file, write a worker-goroutine + channel + `select`/timeout
+  program, with passing tests, unaided.
+- ⭐ **Read real code.** Open an unfamiliar file from Go's own standard library, cold, and narrate every
+  line.
+- ⭐ **Ship something.** Build a small but complete app, end to end.
 
-- The **test-driven rigor** of [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/) —
-  every concept earns its keep by being proven with a test.
-- The **why-first, mental-model storytelling** of [the Rust Book](https://doc.rust-lang.org/book/) — the
-  *why* and the picture come before any syntax.
-
-It's served with **mdBook** (the same engine that builds the Rust Book) and grows one chapter at a time.
+Everything in the course is aimed at those three moments.
 
 ## How a chapter works
 
-Every chapter walks the same loop, so you always know where you are:
+Every chapter walks the same short loop, so you always know where you are. It opens with the *why* — what
+a feature is for and the mental picture behind it — then shows a tiny runnable example. From there you do
+**your rep**: a failing test you make pass, red to green, in real Go code. Once it's green, the tutor
+quizzes you from memory (this is the part that makes it actually stick), and finally points you at the same
+idea living in the wild — usually somewhere in the standard library, so you see it's not a toy.
 
-1. **Why-first** — what the feature is *for*, and the mental picture, before any code.
-2. **A tiny runnable example** — small, real, with the output shown.
-3. **Your rep** — a failing test you make pass (**RED → GREEN**). This is where the learning lands.
-4. **Active recall** — answer a few questions without peeking. *This is the retention fix.*
-5. **Real code in the wild** — spot the same idea live in real Go, usually the standard library.
+That's the rhythm of all of them: **why first, then a rep, then recall, then the real thing.** Open any
+chapter and it feels the same.
 
-That loop expands into a fixed **10-section anatomy** (a hook, where we're going, the big idea, the
-details and traps, worked code, prove-it-with-a-test, your rep, active recall, real-code-in-the-wild, and
-a what-you-learned summary) — so no matter which chapter you open, it feels the same.
+## Where it comes from
 
-The prose and the practice live side by side but in separate places: each chapter's text is a markdown
-file in **`lessons/<slug>.md`**, and its exercise is a Go package in **`exercises/<slug>/`** (a failing
-stub you fix, a reference solution, and the test). A small generator, `tools/gen-book.mjs`, wires the
-lessons into this book — so the book you're reading and the code you run never drift apart.
+The Go Gym stands on two shoulders. From [*Learn Go with Tests*](https://quii.gitbook.io/learn-go-with-tests/)
+it takes a simple discipline: no idea is "learned" until a test proves it. From
+[the Rust Book](https://doc.rust-lang.org/book/) it takes the belief that the *why* and the mental model
+come before any syntax — and the warmth to match. It's served with mdBook, the same engine that builds the
+Rust Book, and it grows one chapter at a time.
 
 ## The roadmap
 
-The course is five Parts. The sidebar shows every chapter in order: written ones are links, upcoming ones
-are greyed-out drafts, so the whole journey is always visible.
+The course runs in five Parts, and the sidebar shows all of them at once — written chapters are links,
+upcoming ones are greyed-out drafts, so the whole road is always in view:
 
-- **Part 0 — Getting Started** — install Go, and learn how a project and its packages fit together.
-- **Part 1 — Go Fundamentals** — the core language, re-anchored: integers, iteration, slices, structs,
-  interfaces, pointers, maps, dependency injection, mocking, concurrency, generics, and more.
-- **Part 2 — Testing Fundamentals** — acceptance tests, working without mocks, and a refactoring discipline.
-- **Part 3 — Build an Application** — put it together into a small but complete app, end to end.
-- **Part 4 — Q&A + Meta** — the sharper corners and the anti-patterns to avoid.
-
-## The three graduation bars
-
-The finish line isn't "watched every chapter" — it's three things you can *do*, in order:
-
-- ⭐ **Build from scratch** — from a blank file, write a worker-goroutine + channel + `select`/timeout
-  program, with passing tests, unaided.
-- ⭐ **Read real code** — open an unfamiliar Go **standard-library** file cold and narrate every line.
-- ⭐ **Ship something** — build a small but complete app, end to end.
+- **Part 0 — Getting Started:** install Go and learn how a project and its packages fit together.
+- **Part 1 — Go Fundamentals:** the core language, properly re-anchored — from integers all the way to generics.
+- **Part 2 — Testing Fundamentals:** acceptance tests, working without mocks, and a refactoring discipline.
+- **Part 3 — Build an Application:** put it all together into a small but complete app.
+- **Part 4 — Q&A + Meta:** the sharper corners, and the anti-patterns worth avoiding.
 
 ## Where am I?
 
-Your progress lives in `progress/PROGRESS.local.md`, which your AI keeps updated as you go — so you can
-close the laptop and pick up exactly where you left off.
+Your progress lives in `progress/PROGRESS.local.md`, which your AI tutor keeps updated as you go — close
+the laptop and pick up exactly where you left off. When you're ready, turn the page to
+[The TDD Cycle](tdd.md) and start with Part 0.
