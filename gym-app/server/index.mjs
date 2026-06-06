@@ -15,13 +15,11 @@ app.get('/api/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok' }, error: null });
 });
 
-// --- content routes (owner: backend-content agent) ---------------------------
-// GET /api/curriculum · GET /api/lesson/:slug · GET /api/progress · POST /api/test/:slug
-// ------------------------------------------------------------------------------
-
-// --- tutor routes (owner: tutor-host agent) ----------------------------------
-// GET /api/tutor/events (SSE) · POST /api/tutor/input
-// ------------------------------------------------------------------------------
+// Routers live in their own modules so parallel work never collides here.
+const { default: contentRouter } = await import('./routes.mjs');
+const { tutorRouter } = await import('./tutor.mjs');
+app.use('/api', contentRouter);
+app.use('/api/tutor', tutorRouter);
 
 // Production: serve the built frontend (dev mode uses the Vite proxy instead).
 const distDir = path.join(__dirname, '../web/dist');
