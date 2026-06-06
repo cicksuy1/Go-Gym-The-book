@@ -10,6 +10,12 @@ progress/*.local.md
 *.out
 /coverage*
 
+# Gym App (GUI) build & local state
+gym-app/node_modules/
+gym-app/web/node_modules/
+gym-app/web/dist/
+gym-app/.session.json
+
 # Editor / OS noise
 .DS_Store
 Thumbs.db
