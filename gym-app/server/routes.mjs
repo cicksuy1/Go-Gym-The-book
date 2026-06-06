@@ -167,7 +167,11 @@ router.post('/quiz/:slug/answer', async (req, res) => {
       `Attempt: ${attempt ?? 1}\n` +
       'Reply with ONLY the grade JSON envelope.';
 
-    const envelope = await askTutor(prompt);
+    const envelope = await askTutor(prompt, ['grade']);
+    if (envelope.type !== 'grade' || !envelope.verdict) {
+      res.status(502).json(fail('tutor returned a non-grade reply'));
+      return;
+    }
     const data = {
       verdict: envelope.verdict,
       feedback: envelope.feedback ?? '',

@@ -182,8 +182,8 @@ function isValidEnvelope(obj) {
 let host = null;
 
 /**
- * FIFO of askTutor() callers waiting for the next say/grade envelope.
- * @type {{resolve: (v: object) => void, reject: (e: Error) => void, timer: NodeJS.Timeout}[]}
+ * FIFO of askTutor() callers waiting for the next envelope of an expected type.
+ * @type {{resolve: (v: object) => void, reject: (e: Error) => void, timer: NodeJS.Timeout, expect: string[]}[]}
  */
 const pending = [];
 
@@ -262,10 +262,15 @@ async function canUseTool(toolName, input) {
   return { behavior: 'allow', updatedInput: input };
 }
 
-/** Resolve the oldest pending askTutor() caller with an envelope. */
+/**
+ * Resolve the oldest pending askTutor() caller that expects this envelope
+ * type. Type-aware so unsolicited envelopes (e.g. the primer's "ready" say)
+ * never consume a caller waiting for a grade.
+ */
 function resolvePending(envelope) {
-  const waiter = pending.shift();
-  if (!waiter) return;
+  const idx = pending.findIndex((p) => p.expect.includes(envelope.type));
+  if (idx === -1) return;
+  const [waiter] = pending.splice(idx, 1);
   clearTimeout(waiter.timer);
   waiter.resolve(envelope);
 }
@@ -404,12 +409,13 @@ function ensureHost() {
 
 /**
  * Send a turn into the background tutor conversation and resolve with the next
- * parsed say/grade envelope. Generic: routes.mjs uses it for grading; chat and
- * help turns go through POST /input.
+ * parsed envelope of an expected type. Generic: routes.mjs uses it for grading
+ * (expect ['grade']); chat and help turns go through POST /input.
  * @param {string} text
+ * @param {('say'|'grade'|'hint')[]} [expect]
  * @returns {Promise<object>}
  */
-export function askTutor(text) {
+export function askTutor(text, expect = ['say', 'grade']) {
   const h = ensureHost();
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
@@ -417,7 +423,7 @@ export function askTutor(text) {
       if (idx !== -1) pending.splice(idx, 1);
       reject(new Error('tutor timed out'));
     }, ASK_TIMEOUT_MS);
-    pending.push({ resolve, reject, timer });
+    pending.push({ resolve, reject, timer, expect });
     h.queue.push(text);
   });
 }
