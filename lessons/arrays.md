@@ -5,8 +5,9 @@
 > self-contained box; a slice is a flexible **window** onto a box somewhere else. Get that mental
 > picture and slices stop being scary.*
 
-**What you'll build:** `Sum` — add up a slice of numbers — and around it, the model of how Go's
-collections actually work.
+**What you'll build:** a three-step ladder — `Sum` (add up a slice), `SumAll` (sum *several* slices
+with a variadic function and `append`), and `SumAllTails` (sum each slice's tail, and face the
+empty-slice question head-on) — and around them, the model of how Go's collections actually work.
 
 **Files for this chapter:** `exercises/arrays/arrays.go` (you fix this) · `exercises/arrays/arrays_test.go` (written for you).
 
@@ -18,8 +19,9 @@ By the end you'll be able to:
 
 1. Tell an **array** from a **slice**, and know why you'll almost always reach for the slice.
 2. Use `len`, `range`, and `append`.
-3. Understand the **"slices share their backing array"** gotcha — the #1 slice bug.
-4. Compare slices correctly (spoiler: not with `==`).
+3. Write a **variadic** function (`...[]int`) and slice off a head with `numbers[1:]`.
+4. Understand the **"slices share their backing array"** gotcha — the #1 slice bug.
+5. Compare slices correctly (spoiler: not with `==`).
 
 ---
 
@@ -90,7 +92,33 @@ That's *exactly* the loop you're about to write for `Sum`.
 
 ---
 
-## The one gotcha: slices share their backing array
+## Variadic functions and slicing off a head
+
+Two more tools and you have everything this chapter's reps need.
+
+**Variadic parameters.** `func SumAll(numbersToSum ...[]int) []int` — the `...` means "any number of
+arguments". Inside the function, `numbersToSum` is just a slice of them (here a `[][]int`), so you
+`range` over it like any other slice:
+
+```go
+SumAll([]int{1, 2}, []int{0, 9})   // call it with as many slices as you like
+SumAll()                            // ...including none
+```
+
+(You've already *used* one: `fmt.Println` is variadic. Now you get to write one.)
+
+**Slice expressions.** `numbers[1:]` is a new window onto the same data, starting at index 1 — the
+"tail". The general form is `s[low:high]` (half-open: includes `low`, excludes `high`), and either end
+can be omitted:
+
+```go
+s := []int{1, 2, 3, 4}
+s[1:]    // [2 3 4] — everything but the head
+s[:2]    // [1 2]
+```
+
+⚠️ **Trap:** `numbers[1:]` on an *empty* slice panics — there's no index 1 to start from. Whenever you
+take a tail, ask "what if it's empty?" first. Your `SumAllTails` rep makes you answer that question.
 
 Because a slice is a window onto an array, two slices can look at the **same** data. Mutating through one
 is visible through the other:
@@ -134,28 +162,44 @@ plain `int`, so we just use `!=` — but the moment a function returns a *slice*
 `Sum([]int{})` must be `0`. With a `range`-and-add approach you get that **for free** — the loop just runs
 zero times. That's the elegance: handle the general case well and the edge case often handles itself.
 
+`TestSumAll` and `TestSumAllTails` return a **slice** — so `==` won't compile, and the tests reach for
+exactly the helper you just met:
+
+```go
+if !slices.Equal(got, c.want) {
+	t.Errorf("SumAll(%v) = %v; want %v", c.in, got, c.want)
+}
+```
+
+Two cases earn their keep here. `SumAll()` with **no arguments** passes because `slices.Equal` treats a
+`nil` slice and an empty one as equal — the "nil behaves like empty" rule, working for you. And
+`SumAllTails` gets an **empty slice** on purpose: `numbers[1:]` would panic, so the test forces you to
+decide the empty case *now*, not discover it in production.
+
 ---
 
 ## 🏋️ Your rep — make it GREEN
 
-`arrays.go` returns the wrong thing on purpose:
+`arrays.go` stubs **three functions**, each returning the wrong thing on purpose. Climb the ladder in
+order — each rung uses the previous one:
 
-```go
-func Sum(numbers []int) int {
-	return 0 // TODO(you): range over numbers and add them up
-}
-```
-
-1. Watch it fail (RED): `go test ./exercises/arrays/ -v`
-2. Replace the body: start a running total at `0`, `range` over `numbers`, add each one, return it.
-3. Run again → **GREEN**.
+1. Watch all of it fail (RED): `go test ./exercises/arrays/ -v`
+2. **`Sum`** — start a running total at `0`, `range` over `numbers`, add each one, return it.
+   Run the tests: `TestSum` goes GREEN.
+3. **`SumAll`** — it's variadic, so `numbersToSum` is a `[][]int`. Start with a `nil` slice of totals,
+   `range` over the slices, and `append` each one's `Sum` (reuse the function you just wrote!).
+   Remember: **reassign** the result of `append`. `TestSumAll` goes GREEN.
+4. **`SumAllTails`** — same shape as `SumAll`, but sum `numbers[1:]` instead. First ask: what if the
+   slice is empty? (The test demands `0` — and `numbers[1:]` on an empty slice panics, so guard it
+   with `len`.) Run once more → **everything GREEN**.
 
 ### Stretch goals (ask your tutor to scaffold any)
 
-- `SumAll(numbersToSum ...[]int) []int` — a **variadic** function that sums each slice and returns the
-  totals. (Now your return value is a slice — so the test needs `slices.Equal`.)
-- `SumAllTails(...)` that sums everything *except* the first element of each slice — and decide what to do
-  with an empty slice (this is where the nil/empty question gets real).
+- `Tail(s []int) []int` — return the tail as a **copy** (use `slices.Clone`), then prove with a test
+  that mutating the returned tail does **not** change the original. (Try it *without* `Clone` first and
+  watch the test catch the shared-backing-array bug — the gotcha from this chapter, made real.)
+- Rewrite `SumAllTails` so the empty-slice case has **no** `if` — hint: `s[1:]` only panics when
+  `len(s) == 0`, but `s[min(1, len(s)):]` never does. Is the cleverness worth the readability? Decide.
 
 ---
 
@@ -165,6 +209,8 @@ func Sum(numbers []int) int {
 2. What three things is a slice made of under the hood?
 3. Why must you write `s = append(s, x)` instead of just `append(s, x)`?
 4. Why can't you write `sliceA == sliceB`, and what do you use instead?
+5. What does `...[]int` in a function signature mean, and what *is* the parameter inside the function?
+   And why does `numbers[1:]` panic on an empty slice?
 
 ---
 
@@ -183,10 +229,14 @@ the model you just learned — `slices.Contains`, `slices.Index`, `slices.Sort`,
 - A **slice** (`[]T`) is a **window** onto a backing array: pointer + len + cap. Cheap to pass; it
   **shares**, it doesn't copy.
 - Grow with `append`, and **always reassign** the result. The zero value is `nil` and behaves like empty.
+- A **variadic** parameter (`...[]int`) is just a slice of the arguments inside the function.
+- Slice expressions (`s[1:]`) make a new window onto the **same** data — and panic past the end, so
+  guard the empty case.
 - Slicing **shares** the backing array — mutating one view can change another.
 - You **can't `==` slices**; use `slices.Equal` (or `reflect.DeepEqual`).
 
-✅ **Done when:** `go test ./exercises/arrays/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/arrays/` is GREEN (all three functions) and you can answer the
+five recall questions.
 
 **Next:** Chapter 4 — *Structs, methods & interfaces*, where we give our data a shape and our types
 behaviour — the heart of how Go programs are organized.
