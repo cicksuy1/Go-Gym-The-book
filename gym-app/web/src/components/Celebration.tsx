@@ -16,13 +16,11 @@ const DURATION_MS = 2600
 const HEADLINES: Record<CelebrateReason, string> = {
   red_to_green: 'GREEN! 🟩',
   module_complete: 'Module complete! ⭐',
-  graduation: 'Graduation bar passed! 🎓',
 }
 
 const SUBLINES: Record<CelebrateReason, string> = {
   red_to_green: 'That RED → GREEN flip is the whole engine. Nice rep. 💪',
-  module_complete: 'Both gates passed — test GREEN and recall nailed.',
-  graduation: 'A real milestone. You earned this one.',
+  module_complete: 'A clean win — test GREEN and recall nailed.',
 }
 
 interface Piece {

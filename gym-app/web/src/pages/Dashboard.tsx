@@ -1,7 +1,7 @@
 // Dashboard: overall progress %, "you are here" line, per-part module list
 // with status icons + kind badges, and the graduation-bar cards.
 
-import { useCallbackProgress } from '../lib/useGymData'
+import { useDashboardData } from '../lib/useGymData'
 import type {
   Curriculum,
   CurriculumModule,
@@ -10,7 +10,8 @@ import type {
 } from '../lib/types'
 
 interface DashboardProps {
-  onOpenLesson: (slug: string) => void
+  /** Start a conductor session for a written module and open the Session page. */
+  onOpenModule: (slug: string, title: string) => void
 }
 
 const KIND_BADGE: Record<CurriculumModule['kind'], { icon: string; label: string }> =
@@ -46,8 +47,8 @@ function currentModuleTitle(
   return slug
 }
 
-export function Dashboard({ onOpenLesson }: DashboardProps) {
-  const { curriculum, progress, loading, error, reload } = useCallbackProgress()
+export function Dashboard({ onOpenModule }: DashboardProps) {
+  const { curriculum, progress, loading, error, reload } = useDashboardData()
 
   if (loading) {
     return <CenteredNote text="Loading your gym…" />
@@ -103,8 +104,10 @@ export function Dashboard({ onOpenLesson }: DashboardProps) {
                 <li key={mod.slug}>
                   <button
                     type="button"
-                    onClick={() => onOpenLesson(mod.slug)}
-                    className="group flex w-full items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors hover:border-emerald-700 hover:bg-zinc-900"
+                    onClick={() => onOpenModule(mod.slug, `${mod.number} · ${mod.title}`)}
+                    disabled={!mod.written}
+                    title={mod.written ? 'Open in the conductor' : 'Not written yet'}
+                    className="group flex w-full items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors enabled:hover:border-emerald-700 enabled:hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span className="text-lg">{status.icon}</span>
                     <span className="flex-1">
@@ -116,11 +119,14 @@ export function Dashboard({ onOpenLesson }: DashboardProps) {
                           {status.done}
                         </span>
                       )}
+                      {!mod.written && (
+                        <span className="ml-2 text-xs text-zinc-600">⬜ to-write</span>
+                      )}
                     </span>
                     <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-xs text-zinc-400">
                       {kind.icon} {kind.label}
                     </span>
-                    <span className="text-zinc-600 group-hover:text-emerald-400">
+                    <span className="text-zinc-600 group-enabled:group-hover:text-emerald-400">
                       →
                     </span>
                   </button>

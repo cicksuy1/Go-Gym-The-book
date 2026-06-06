@@ -1,121 +1,137 @@
-// Tests for the tutor envelope parser. No live SDK session is opened here —
-// importing tutor.mjs only registers routes and exports; the conversation host
-// is lazy and never started unless askTutor/POST /input is called.
+// Tests for the conductor's tool permission policy (evaluateToolUse).
+// Pure + synchronous — no live SDK session is opened. Importing tutor.mjs only
+// registers routes and exports; the conversation host is eager only via
+// startTutor(), which these tests never call.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseEnvelope } from './tutor.mjs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { evaluateToolUse } from './tutor.mjs';
 
-test('parses a bare say envelope', () => {
-  const env = parseEnvelope('{"type":"say","text":"hello"}');
-  assert.deepEqual(env, { type: 'say', text: 'hello' });
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, '../..');
+
+function allow(toolName, input) {
+  const r = evaluateToolUse(toolName, input);
+  assert.equal(r.behavior, 'allow', `expected allow, got deny: ${r.message ?? ''}`);
+}
+function deny(toolName, input) {
+  const r = evaluateToolUse(toolName, input);
+  assert.equal(r.behavior, 'deny', 'expected deny, got allow');
+}
+
+// --- Bash: go test / go vet on ./exercises/ -------------------------------
+
+test('Bash: go test on an exercises path is allowed', () => {
+  allow('Bash', { command: 'go test ./exercises/integers/' });
 });
 
-test('parses a fenced say envelope', () => {
-  const text = '```json\n{"type":"say","text":"fenced"}\n```';
-  const env = parseEnvelope(text);
-  assert.equal(env.type, 'say');
-  assert.equal(env.text, 'fenced');
+test('Bash: go vet on an exercises path is allowed', () => {
+  allow('Bash', { command: 'go vet ./exercises/arrays/' });
 });
 
-test('parses an envelope surrounded by prose', () => {
-  const text =
-    'Here is my reply for you.\n{"type":"hint","level":1,"text":"look at the return"}\nThanks!';
-  const env = parseEnvelope(text);
-  assert.equal(env.type, 'hint');
-  assert.equal(env.level, 1);
+test('Bash: go test with -race on an exercises path is allowed', () => {
+  allow('Bash', { command: 'go test -race ./exercises/concurrency/' });
 });
 
-test('parses a multiline / pretty-printed envelope', () => {
-  const text = `{
-    "type": "grade",
-    "question": 2,
-    "verdict": "partial",
-    "feedback": "close",
-    "reteach": "the timing matters"
-  }`;
-  const env = parseEnvelope(text);
-  assert.equal(env.type, 'grade');
-  assert.equal(env.question, 2);
-  assert.equal(env.verdict, 'partial');
-  assert.equal(env.reteach, 'the timing matters');
+test('Bash: chained command (&&) is denied', () => {
+  deny('Bash', { command: 'go test ./exercises/integers/ && rm -rf .' });
 });
 
-test('grade envelope is valid without reteach (correct verdict)', () => {
-  const env = parseEnvelope('{"type":"grade","question":1,"verdict":"correct","feedback":"nailed it"}');
-  assert.equal(env.verdict, 'correct');
-  assert.equal(env.reteach, undefined);
+test('Bash: a bare destructive command is denied', () => {
+  deny('Bash', { command: 'rm -rf' });
 });
 
-test('handles braces inside JSON string values', () => {
-  const env = parseEnvelope('{"type":"say","text":"use {} for an empty block"}');
-  assert.equal(env.type, 'say');
-  assert.equal(env.text, 'use {} for an empty block');
+test('Bash: go test targeting outside exercises is denied', () => {
+  deny('Bash', { command: 'go test ../../etc' });
 });
 
-test('picks the LAST valid object when several are present', () => {
-  const text =
-    '{"type":"say","text":"first"}\nsome reasoning\n{"type":"say","text":"final"}';
-  const env = parseEnvelope(text);
-  assert.equal(env.text, 'final');
+test('Bash: go test with no exercises path is denied', () => {
+  deny('Bash', { command: 'go test ./...' });
 });
 
-test('skips a trailing malformed object and finds the prior valid one', () => {
-  const text = '{"type":"say","text":"good"}\n{"type":"say","text": oops}';
-  const env = parseEnvelope(text);
-  assert.equal(env.text, 'good');
+test('Bash: piped command is denied', () => {
+  deny('Bash', { command: 'go test ./exercises/integers/ | tee out.txt' });
 });
 
-test('rejects an unknown type', () => {
-  assert.equal(parseEnvelope('{"type":"spike","skills_seen":true}'), null);
+test('Bash: command substitution is denied', () => {
+  deny('Bash', { command: 'go test ./exercises/$(whoami)/' });
 });
 
-test('rejects a say envelope missing text', () => {
-  assert.equal(parseEnvelope('{"type":"say"}'), null);
+test('Bash: a non-go command is denied', () => {
+  deny('Bash', { command: 'cat ./exercises/integers/integers_solution.go' });
 });
 
-test('rejects a grade envelope missing required fields', () => {
-  assert.equal(parseEnvelope('{"type":"grade","question":1}'), null);
+test('Bash: empty command is denied', () => {
+  deny('Bash', { command: '' });
 });
 
-test('rejects a grade envelope with an invalid verdict', () => {
-  assert.equal(
-    parseEnvelope('{"type":"grade","question":1,"verdict":"maybe","feedback":"x"}'),
-    null,
-  );
+// --- Edit / Write: only PROGRESS.local.md ---------------------------------
+
+test('Edit on progress/PROGRESS.local.md (forward slashes) is allowed', () => {
+  allow('Edit', { file_path: 'progress/PROGRESS.local.md' });
 });
 
-test('rejects a grade envelope with a non-integer question', () => {
-  assert.equal(
-    parseEnvelope('{"type":"grade","question":"one","verdict":"correct","feedback":"x"}'),
-    null,
-  );
+test('Edit on PROGRESS.local.md via absolute repo path is allowed', () => {
+  allow('Edit', { file_path: path.join(REPO_ROOT, 'progress', 'PROGRESS.local.md') });
 });
 
-test('rejects a hint envelope with an out-of-range level', () => {
-  assert.equal(parseEnvelope('{"type":"hint","level":5,"text":"too far"}'), null);
+test('Edit on PROGRESS.local.md with back slashes is allowed', () => {
+  allow('Edit', { file_path: 'progress\\PROGRESS.local.md' });
 });
 
-test('rejects a hint envelope missing text', () => {
-  assert.equal(parseEnvelope('{"type":"hint","level":2}'), null);
+test('Write on the learner stub (exercises/integers/integers.go) is DENIED', () => {
+  deny('Write', { file_path: 'exercises/integers/integers.go' });
 });
 
-test('returns null when there is no JSON object at all', () => {
-  assert.equal(parseEnvelope('I have no idea, sorry.'), null);
+test('Edit on the template (not .local) is denied', () => {
+  deny('Edit', { file_path: 'progress/PROGRESS.template.md' });
 });
 
-test('returns null for non-string input', () => {
-  assert.equal(parseEnvelope(null), null);
-  assert.equal(parseEnvelope(undefined), null);
-  assert.equal(parseEnvelope(42), null);
+test('Write with no file_path is denied', () => {
+  deny('Write', { file_path: '' });
 });
 
-test('recovers the inner envelope object even when wrapped in an array', () => {
-  // The scanner extracts balanced {...} objects, so a valid envelope nested in
-  // an array is still found — a useful recovery rather than a hard reject.
-  const env = parseEnvelope('[{"type":"say","text":"x"}]');
-  assert.deepEqual(env, { type: 'say', text: 'x' });
+// --- *_solution.go is sealed across every tool ----------------------------
+
+test('Read on a _solution.go file is denied', () => {
+  deny('Read', { file_path: 'exercises/integers/integers_solution.go' });
 });
 
-test('rejects a bare JSON array with no envelope object inside', () => {
-  assert.equal(parseEnvelope('["just","strings"]'), null);
+test('Bash referencing a solution file is denied', () => {
+  deny('Bash', { command: 'go test ./exercises/integers/integers_solution.go' });
+});
+
+// --- Grep: no scanning exercises directories ------------------------------
+
+test('Grep over an exercises directory is denied', () => {
+  deny('Grep', { pattern: 'func', path: 'exercises/integers/' });
+});
+
+test('Grep against a specific .go file under exercises is allowed', () => {
+  allow('Grep', { pattern: 'func', path: 'exercises/integers/integers.go' });
+});
+
+test('Grep over a non-exercises path is allowed', () => {
+  allow('Grep', { pattern: 'TODO', path: 'lessons/' });
+});
+
+// --- Read / Glob / Skill: generally allowed -------------------------------
+
+test('Read on a lesson file is allowed', () => {
+  allow('Read', { file_path: 'lessons/arrays.md' });
+});
+
+test('Glob is allowed', () => {
+  allow('Glob', { pattern: 'exercises/**/*_test.go' });
+});
+
+test('Skill is allowed', () => {
+  allow('Skill', { skill: 'gym-ui' });
+});
+
+// --- Tools outside the allowlist ------------------------------------------
+
+test('an unlisted tool (WebFetch) is denied', () => {
+  deny('WebFetch', { url: 'https://example.com' });
 });

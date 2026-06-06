@@ -1,10 +1,10 @@
-// Data-loading hooks for the dashboard. Fetches curriculum + progress together
+// Data-loading hook for the dashboard. Fetches curriculum + progress together
 // and refetches progress when a progress_changed SSE event arrives.
 
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 import { useTutor } from './TutorContext'
-import type { Curriculum, Lesson, Progress } from './types'
+import type { Curriculum, Progress } from './types'
 
 interface DashboardData {
   curriculum: Curriculum | null
@@ -14,7 +14,7 @@ interface DashboardData {
   reload: () => void
 }
 
-export function useCallbackProgress(): DashboardData {
+export function useDashboardData(): DashboardData {
   const { onProgressChanged } = useTutor()
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null)
   const [progress, setProgress] = useState<Progress | null>(null)
@@ -49,40 +49,4 @@ export function useCallbackProgress(): DashboardData {
   )
 
   return { curriculum, progress, loading, error, reload: load }
-}
-
-interface LessonData {
-  lesson: Lesson | null
-  loading: boolean
-  error: string | null
-}
-
-export function useLesson(slug: string): LessonData {
-  const [lesson, setLesson] = useState<Lesson | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-    setLesson(null)
-    api
-      .getLesson(slug)
-      .then((l) => {
-        if (!cancelled) setLesson(l)
-      })
-      .catch((e: unknown) => {
-        if (!cancelled)
-          setError(e instanceof Error ? e.message : 'Failed to load lesson')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [slug])
-
-  return { lesson, loading, error }
 }

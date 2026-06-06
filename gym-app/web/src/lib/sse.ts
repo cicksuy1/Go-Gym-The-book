@@ -34,8 +34,7 @@ function dispatch(
 const EVENT_TYPES: TutorEventType[] = [
   'tutor_partial',
   'tutor_message',
-  'grade_result',
-  'hint',
+  'tool_activity',
   'test_result',
   'module_complete',
   'celebrate',

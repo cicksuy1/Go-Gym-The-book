@@ -52,19 +52,28 @@ const components: Components = {
     </blockquote>
   ),
   table: ({ children }) => (
-    <div className="my-5 overflow-x-auto">
+    <div className="my-5 overflow-x-auto rounded-lg border border-zinc-800">
       <table className="w-full border-collapse text-sm text-zinc-300">
         {children}
       </table>
     </div>
   ),
+  thead: ({ children }) => (
+    <thead className="bg-zinc-800/70 text-zinc-100">{children}</thead>
+  ),
+  tbody: ({ children }) => (
+    <tbody className="divide-y divide-zinc-800 [&>tr:nth-child(even)]:bg-zinc-900/40">
+      {children}
+    </tbody>
+  ),
+  tr: ({ children }) => <tr>{children}</tr>,
   th: ({ children }) => (
-    <th className="border border-zinc-800 bg-zinc-900 px-3 py-2 text-left font-semibold text-zinc-100">
+    <th className="border-b border-zinc-700 px-3 py-2 text-left font-semibold tracking-wide">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border border-zinc-800 px-3 py-2 align-top">{children}</td>
+    <td className="px-3 py-2 align-top leading-6">{children}</td>
   ),
   code: ({ className, children }) => {
     const isBlock = className?.includes('language-')

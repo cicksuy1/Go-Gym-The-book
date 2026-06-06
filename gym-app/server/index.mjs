@@ -1,4 +1,5 @@
-// The Go Gym GUI server — serves the built frontend, the content API, and the tutor bridge.
+// The Go Gym GUI server — a tunnel to the real /go-gym conductor conversation.
+// Serves the built frontend, the content API, and the conversation bridge.
 import express from 'express';
 import { watch } from 'node:fs';
 import path from 'node:path';
@@ -18,18 +19,39 @@ app.get('/api/health', (_req, res) => {
 
 // Routers live in their own modules so parallel work never collides here.
 const { default: contentRouter } = await import('./routes.mjs');
-const { tutorRouter, broadcast } = await import('./tutor.mjs');
+const { tutorRouter, broadcast, startTutor } = await import('./tutor.mjs');
+const { readProgress } = await import('./progress.mjs');
 app.use('/api', contentRouter);
 app.use('/api/tutor', tutorRouter);
 
-// PROGRESS.local.md is the single source of truth, shared with CLI sessions —
-// watch its directory (the file may not exist yet) and tell clients to refetch.
+// PROGRESS.local.md is the single source of truth — the conductor writes it
+// itself. Watch the directory (the file may not exist yet), tell clients to
+// refetch, and celebrate newly completed modules by diffing the ✅ rows.
+function completedSlugs() {
+  try {
+    return new Set(readProgress().completed.map((r) => r.module));
+  } catch {
+    return new Set();
+  }
+}
+
 try {
+  let known = completedSlugs();
   let timer = null;
   watch(path.join(REPO_ROOT, 'progress'), (_event, filename) => {
     if (filename !== 'PROGRESS.local.md') return;
     clearTimeout(timer);
-    timer = setTimeout(() => broadcast('progress_changed', {}), PROGRESS_DEBOUNCE_MS);
+    timer = setTimeout(() => {
+      broadcast('progress_changed', {});
+      const now = completedSlugs();
+      for (const slug of now) {
+        if (!known.has(slug)) {
+          broadcast('module_complete', { slug });
+          broadcast('celebrate', { reason: 'module_complete' });
+        }
+      }
+      known = now;
+    }, PROGRESS_DEBOUNCE_MS);
   });
 } catch (err) {
   console.error('progress watch unavailable:', err.message);
@@ -45,4 +67,6 @@ app.get(/^\/(?!api\/).*/, (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Go Gym GUI server on http://localhost:${PORT}`);
+  // Open the conductor conversation eagerly so the tutor is visibly online.
+  startTutor();
 });

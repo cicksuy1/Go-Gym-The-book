@@ -1,4 +1,4 @@
-// Shared types mirroring gym-app/CONTRACT.md exactly.
+// Shared types mirroring gym-app/CONTRACT.md (v1.1 — conversation tunnel).
 
 export interface ApiResponse<T> {
   success: boolean
@@ -37,20 +37,6 @@ export interface Curriculum {
   graduationBars: GraduationBar[]
 }
 
-// --- Lesson ---
-
-export interface RepFiles {
-  stub: string
-  test: string
-}
-
-export interface Lesson {
-  slug: string
-  markdown: string
-  recallQuestions: string[]
-  repFiles: RepFiles | null // null when no exercise (setup)
-}
-
 // --- Progress ---
 
 export interface CompletedModule {
@@ -72,43 +58,20 @@ export interface Progress {
   graduationBars: ProgressGraduationBar[]
 }
 
-// --- Test ---
+// --- Tutor status ---
+
+export type TutorState = 'starting' | 'online' | 'dead'
+
+export interface TutorStatus {
+  state: TutorState
+  sessionId: string | null
+}
+
+// --- Test (manual run, broadcast over SSE) ---
 
 export type TestStatus = 'green' | 'red'
 
-export interface TestResult {
-  status: TestStatus
-  output: string
-  durationMs: number
-}
-
-// --- Quiz ---
-
-export type Verdict = 'correct' | 'partial' | 'wrong'
-
-export interface QuizAnswerRequest {
-  question: number
-  answer: string
-  attempt: number
-}
-
-export interface QuizVerdict {
-  verdict: Verdict
-  feedback: string
-  reteach: string | null
-}
-
-// --- Tutor input ---
-
-export type TutorInputKind = 'chat' | 'help_red_test'
-
-export interface TutorInputRequest {
-  kind: TutorInputKind
-  text: string
-  slug: string | null
-}
-
-// --- SSE events (CONTRACT.md §SSE) ---
+// --- SSE events (CONTRACT.md §SSE, v1.1) ---
 
 export interface TutorPartialEvent {
   text: string
@@ -118,19 +81,8 @@ export interface TutorMessageEvent {
   text: string
 }
 
-export interface GradeResultEvent {
-  slug: string
-  question: number
-  verdict: Verdict
-  feedback: string
-  reteach: string | null
-}
-
-export type HintLevel = 1 | 2 | 3 | 4
-
-export interface HintEvent {
-  level: HintLevel
-  text: string
+export interface ToolActivityEvent {
+  text: string // pre-formatted, e.g. "🧪 go test ./exercises/arrays/"
 }
 
 export interface TestResultEvent {
@@ -141,10 +93,9 @@ export interface TestResultEvent {
 
 export interface ModuleCompleteEvent {
   slug: string
-  finished: string
 }
 
-export type CelebrateReason = 'red_to_green' | 'module_complete' | 'graduation'
+export type CelebrateReason = 'module_complete' | 'red_to_green'
 
 export interface CelebrateEvent {
   reason: CelebrateReason
@@ -159,8 +110,7 @@ export interface CostUpdateEvent {
 export interface TutorEventMap {
   tutor_partial: TutorPartialEvent
   tutor_message: TutorMessageEvent
-  grade_result: GradeResultEvent
-  hint: HintEvent
+  tool_activity: ToolActivityEvent
   test_result: TestResultEvent
   module_complete: ModuleCompleteEvent
   celebrate: CelebrateEvent
