@@ -40,7 +40,7 @@ Let's build both pictures properly.
 
 ---
 
-## The array: a fixed row of boxes in memory
+## So what exactly *is* an array?
 
 Picture your computer's memory as one enormous street of numbered storage units. An **array** is a row
 of **identical units side by side**: Go reserves one *contiguous* block of that street, splits it into
@@ -92,7 +92,7 @@ So why learn it? Because the thing you **will** use every day is built directly 
 
 ---
 
-## The slice: a flexible window onto an array
+## Enter the slice — a window onto the boxes
 
 Real programs rarely know their sizes up front — *how many lines does the file have?* What you want
 day-to-day is a collection that can **grow**. That's the **slice**, written `[]int` — no number
