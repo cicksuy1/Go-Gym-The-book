@@ -18,8 +18,12 @@ const MAX_TURNS = 50;
 const PRIMER_TURN =
   'Load the gym-ui skill rules. You are now the GUI tutor. ' +
   'Reply {"type":"say","text":"ready"}';
-const SOLUTION_FILE_RE = /_solution\.go$/i;
+// Substring (not suffix-anchored) so trailing spaces / './' tricks can't slip past.
+const SOLUTION_FILE_RE = /_solution/i;
 const ALLOWED_TOOLS = ['Read', 'Glob', 'Grep'];
+// Grep over an exercises/ directory would return solution-file contents without
+// ever naming a *_solution.go path — only allow Grep against a specific .go file.
+const EXERCISES_DIR_RE = /exercises[\\/]/i;
 
 export const tutorRouter = Router();
 
@@ -255,8 +259,17 @@ async function canUseTool(toolName, input) {
     return { behavior: 'deny', message: `Tool ${toolName} is not allowed for the tutor.` };
   }
   for (const value of Object.values(input ?? {})) {
-    if (typeof value === 'string' && SOLUTION_FILE_RE.test(value)) {
-      return { behavior: 'deny', message: 'Reading *_solution.go is forbidden.' };
+    if (typeof value !== 'string') continue;
+    if (SOLUTION_FILE_RE.test(value)) {
+      return { behavior: 'deny', message: 'Reading solution files is forbidden.' };
+    }
+    // Grep over an exercises directory leaks solution contents without naming
+    // a solution path; require a specific non-solution .go file instead.
+    if (toolName === 'Grep' && EXERCISES_DIR_RE.test(value) && !/\.go$/i.test(value.trim())) {
+      return {
+        behavior: 'deny',
+        message: 'Grep over exercises/ directories is forbidden — Read or Grep a specific stub or test file instead.',
+      };
     }
   }
   return { behavior: 'allow', updatedInput: input };
@@ -275,6 +288,15 @@ function resolvePending(envelope) {
   waiter.resolve(envelope);
 }
 
+/** Fail every waiting askTutor() caller (conversation died or misbehaved). */
+function rejectAllPending(err) {
+  while (pending.length > 0) {
+    const waiter = pending.shift();
+    clearTimeout(waiter.timer);
+    waiter.reject(err);
+  }
+}
+
 /**
  * Route a parsed envelope to SSE + any waiting askTutor() caller.
  * @param {object} envelope
@@ -286,12 +308,8 @@ function routeEnvelope(envelope) {
       resolvePending(envelope);
       break;
     case 'grade':
-      broadcast('grade_result', {
-        question: envelope.question,
-        verdict: envelope.verdict,
-        feedback: envelope.feedback,
-        reteach: envelope.reteach ?? null,
-      });
+      // routes.mjs broadcasts grade_result (it knows the slug); here we only
+      // resolve the waiting grading caller.
       resolvePending(envelope);
       break;
     case 'hint':
@@ -334,6 +352,11 @@ function initConversation() {
     } catch (err) {
       console.error('tutor: conversation loop error:', err.message);
       broadcast('tutor_message', { text: '(tutor connection error)' });
+    } finally {
+      // The conversation is dead — fail waiters and allow a fresh lazy init.
+      rejectAllPending(new Error('tutor conversation ended'));
+      queue.close();
+      host = null;
     }
   };
 
@@ -366,8 +389,10 @@ function initConversation() {
         queue.push('Reply with only the JSON envelope.');
       } else {
         correctionSent = false;
-        const errorEnvelope = { type: 'say', text: '(tutor format error)' };
-        routeEnvelope(errorEnvelope);
+        // Don't leave typed waiters (e.g. a grade request) hanging until the
+        // 90s timeout — fail them now so the HTTP caller gets a real error.
+        rejectAllPending(new Error('tutor format error'));
+        broadcast('tutor_message', { text: '(tutor format error)' });
       }
       return;
     }

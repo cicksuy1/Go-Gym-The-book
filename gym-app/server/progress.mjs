@@ -163,7 +163,10 @@ export function markComplete(slug, info) {
     ? model.completed
     : [...model.completed, { number, module: slug, finished: info.date, recall: '✅' }];
 
-  const updated = { ...model, completed, current: nextWrittenSlug(slug) };
+  // Only advance `current` when the learner completed the module they were on;
+  // re-completing an earlier module must not yank `current` around.
+  const current = model.current === slug ? nextWrittenSlug(slug) : model.current;
+  const updated = { ...model, completed, current };
   writeProgress(updated);
   return updated;
 }
