@@ -18,12 +18,14 @@ storytelling** of [the Rust Book](https://doc.rust-lang.org/book/).
 - You've bounced off terse tutorials and want the *why* before the *how*.
 - You learn by building, not by watching.
 
-## How it works — three layers
+## How it works — three layers (plus an optional GUI)
 
 1. **A book** ([read online](https://cicksuy1.github.io/Go-Gym-The-book/) — `book/`, built with [mdBook](https://rust-lang.github.io/mdBook/)) — one why-first chapter per concept.
 2. **Exercises** (one Go package per module) — each ships a failing test you make pass.
 3. **An AI conductor** (`AGENTS.md`) — runs you through it: explains, gates on real `go test` results,
    quizzes you, tracks progress, and keeps the pace sane so you don't burn out.
+4. **(Optional) The Gym GUI** ([`gym-app/`](gym-app/README.md)) — a local web app that puts the same
+   conductor conversation in your browser, with streaming replies, live progress, and celebrations.
 
 Every module follows the same loop: **why-first → tiny example → make the test green → recall quiz →
 real code in the wild.**
@@ -42,8 +44,14 @@ The full per-chapter list and statuses live in **[`CURRICULUM.md`](CURRICULUM.md
 
 ## Quickstart
 
-**Prerequisites:** [Go](https://go.dev/dl/) 1.26+, an AI coding agent, and (optional, to read the book in a
-browser) [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html).
+**Prerequisites:** [Go](https://go.dev/dl/) 1.26+, an AI coding agent, and optionally:
+[mdBook](https://rust-lang.github.io/mdBook/guide/installation.html) (read the book in a browser) and
+[go-task](https://taskfile.dev/installation/) (one-command shortcuts — see *One command each: the Taskfile* below).
+
+```bash
+winget install Task.Task   # Windows          (or: choco install go-task)
+brew install go-task       # macOS / Linuxbrew
+```
 
 mdBook is only needed if you want to read the book locally — the course itself runs through your AI agent
 and `go test`. Install it whichever way suits you:
@@ -70,10 +78,30 @@ cp progress/PROGRESS.template.md progress/PROGRESS.local.md
 Your agent reads `AGENTS.md`, sees you're at Module 1, and begins. From then on: `continue`, `next`,
 `test me`, `where am I`, `I'm stuck`, or `add an exercise`.
 
-### Three ways to start
+### Four ways to start
 - **Any agent:** it auto-reads `AGENTS.md`; just say *"start the Go Gym."*
 - **Claude Code:** run the **`/go-gym`** skill — it shows where you are and drives the next module.
+- **Prefer a GUI?** `task setup && task app`, then open `http://localhost:4600` for the tutor chat —
+  see [`gym-app/README.md`](gym-app/README.md).
 - **Prefer reading first?** Follow this README, `mdbook serve book`, and let your agent take it from there.
+
+## One command each: the Taskfile 🛠️
+
+The repo ships a [`Taskfile.yml`](Taskfile.yml) so every common move is one command
+(needs [go-task](https://taskfile.dev/installation/) — see prerequisites above):
+
+| Command | What it does |
+|---------|--------------|
+| `task --list` | Show every available command. |
+| `task setup` | One-time install for the Gym GUI (server + web deps). |
+| `task up` | Serve the book (`:3000`) **and** the Gym GUI (`:4600`) together. |
+| `task app` / `task app:dev` | Run just the GUI (production / dev with hot reload). |
+| `task book` / `task book:build` | Serve / build the book. |
+| `task test SLUG=arrays` | Run *your* rep for one module — red until you make it green. |
+| `task qa` | Author gates: vet + reference solutions GREEN + book builds clean. |
+
+No go-task? Everything also works as plain commands — `go test ./exercises/<module>/`,
+`mdbook serve book`, and `npm run start` inside `gym-app/`.
 
 ## Curriculum & progress
 
