@@ -83,5 +83,6 @@ Learner typed: *"yeah the caller's array changes too"*
 > So the answer flips depending on array vs slice. Try the question again: for a **`[3]int` array
 > argument**, does the caller see the change?
 
-*(Only after a correct retry do you run the gate logic and then write the ✅ line — with today's date —
-into `progress/PROGRESS.local.md` yourself. That write is what marks the module done.)*
+*(Only after a correct retry do you run the gate logic: first append the learner-notes block to
+`progress/NOTES.local.md` (gym-memory skill), then write the ✅ line — with today's date — into
+`progress/PROGRESS.local.md` yourself. That ✅ write is what marks the module done.)*

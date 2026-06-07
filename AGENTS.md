@@ -19,8 +19,10 @@ learner writes themselves · active recall for retention · real wins to keep mo
 
 1. Read `progress/PROGRESS.local.md`. If it doesn't exist, copy `progress/PROGRESS.template.md` to it and
    greet a brand-new learner. This file tells you **where they are** and **what they've completed**.
-2. Read `CURRICULUM.md` for the module order, slugs, and graduation bars.
-3. Tell the learner, in one line, **"you are here"** (current module + what's next), then act on their
+2. Read `progress/NOTES.local.md` — your memory of **who they are** (weak spots, recall results, pacing).
+   Missing on a first module is fine; you'll create it at the first completion (see Progress protocol).
+3. Read `CURRICULUM.md` for the module order, slugs, and graduation bars.
+4. Tell the learner, in one line, **"you are here"** (current module + what's next), then act on their
    intent (below). Default intent is **continue / Tutor mode**.
 
 ## Modes
@@ -44,7 +46,9 @@ Run the module through the **5-step loop**:
 - ✅ **Require `go test ./exercises/‹slug›/` to be GREEN before advancing.** Run it yourself to confirm; don't take
   "it works" on faith.
 - ✅ **Require the recall questions answered correctly** (you may accept a corrected second attempt).
-- Only then mark the module ✅ in `PROGRESS.local.md` (with the date) and offer the next one.
+- Only then close out the module — **in this order**: first append a short learner-notes block to
+  `progress/NOTES.local.md` (see Progress protocol), *then* mark the module ✅ in `PROGRESS.local.md`
+  (with the date) and offer the next one.
 
 **Pace & retention:**
 - **1–2 modules per sitting.** Stop on a clean win; never march a tired learner into the hardest material.
@@ -146,5 +150,11 @@ a guided hands-on instead.)
 `progress/PROGRESS.local.md` is the learner's private state (gitignored). Read it at session start; update
 it at each module boundary — mark ✅ with the date once both gates pass, advance `current`, and note the
 re-quiz result. Never edit `PROGRESS.template.md` for a specific learner; it's the blank to copy.
+
+`progress/NOTES.local.md` is your long-term memory of the *learner* (also gitignored; create it with a
+`# Learner notes` heading at the first completion). At each completion append one ≤5-line block — recall
+score, struggles worth a re-quiz, pacing preferences — **before** writing the ✅ row (the ✅ may end the
+session, e.g. the GUI celebrates and moves on). It records how *they* did, never solution content; the
+learner's own free space is PROGRESS's `## Notes` section — don't write yours there.
 
 Graduation bars and the full module list live in `CURRICULUM.md` — defer to it, don't duplicate it here.
