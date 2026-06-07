@@ -30,7 +30,9 @@ stingy — it's Go noticing that every loop is really the same idea ("keep doing
 refusing to give you four spellings of one concept. The payoff: you read *any* Go loop and instantly know
 it's a `for`. Less to learn, less to misread.
 
-The trick is that `for` flexes into four shapes depending on how much of it you write.
+The trick is that `for` flexes into four shapes depending on how much of it you write. Hold this
+picture for the chapter — it's the mental model: **one tool, four grips.** Same handle every time;
+you just hold it differently depending on the job.
 
 ---
 
@@ -80,6 +82,10 @@ away: `for _, ch := range "Go"`. We'll lean on `range` heavily once we hit slice
 
 > **`break` and `continue`:** `break` leaves the loop entirely; `continue` skips to the next pass. Both
 > work in all four shapes.
+
+**Checkpoint:** one tool, four grips — full (`init; cond; post`), condition-only (Go's "while"),
+infinite (`for {}` + `break`), and `range` (index + value over a collection). If you can read one,
+you can read them all: it's always `for`.
 
 ---
 
@@ -159,8 +165,42 @@ go test -bench=. -tags solution ./exercises/iteration/
 > otherwise PowerShell splits the trailing dot off and the benchmark silently won't run.
 
 (We pass `-tags solution` here only so there's a *working* `Repeat` to measure while the stub is still
-red.) You'll see a line like `BenchmarkRepeat-8   ... 240 ns/op`. That number is a fact you can *improve* —
-which is exactly how, later, you'll prove `strings.Builder` is worth it instead of just believing a blog.
+red.) You'll see a line like `BenchmarkRepeat-8   ... 4514 ns/op`. That number is a **fact you can
+improve** — and here's a taste of what that feels like, because this chapter's worked example has a
+real inefficiency hiding in it.
+
+Strings in Go are **immutable** — they can't be changed, only replaced. So every `result += s` builds
+a brand-new, slightly longer string and copies everything across. Loop a hundred times and you copy
+the growing string a hundred times. The standard library's answer is `strings.Builder`, which appends
+into one growing buffer and makes the string once at the end:
+
+```go
+var b strings.Builder
+for i := 0; i < count; i++ {
+	b.WriteString(s)
+}
+return b.String()
+```
+
+Is it actually faster, or is that just a blog post's opinion? **Measure it.** Both versions,
+repeating a string 100 times, benchmarked with `-benchmem` (which adds memory columns):
+
+```text
+BenchmarkRepeatConcat-8     297572    4514 ns/op    5664 B/op    99 allocs/op
+BenchmarkRepeatBuilder-8   4060437     313 ns/op     248 B/op     5 allocs/op
+```
+
+Read the columns: the `+=` version takes ~4,500 nanoseconds and performs **99 separate memory
+allocations** per call — one per copy, exactly as the immutability story predicts. The `Builder`
+version: ~14× faster, 5 allocations. No opinions, no faith — a measurement. That's what benchmarks
+are *for*: turning "I heard X is faster" into a number you watched appear.
+
+(For your rep, plain `+=` is the right call — clearest code first, optimize when a measurement says
+so. The stretch goal lets you reproduce this experiment yourself.)
+
+**Checkpoint:** a benchmark (`func BenchmarkX(b *testing.B)`, run with `go test -bench=.`) measures
+ns/op; add `-benchmem` for allocations. Strings are immutable, so `+=` in a loop copies — and the
+benchmark is how you *know* `strings.Builder` beats it (~14×) instead of believing it.
 
 ---
 
@@ -178,7 +218,13 @@ func Repeat(s string, count int) string {
    ```text
    go test ./exercises/iteration/ -v
    ```
-2. Replace the body with a `for` loop that builds up the answer.
+   ```text
+   --- FAIL: TestRepeat/a_few_times
+       iteration_test.go:25: Repeat("a", 3) = ""; want "aaa"
+   ```
+   Same anatomy as chapter 1's failure: the call, what you got, what was wanted.
+2. Replace the body with a `for` loop that builds up the answer — full grip:
+   start `i := 0`, while `i < count`, `i++`, and glue on one copy of `s` each pass.
 3. Run again → **GREEN**. Then, for fun, measure it:
    ```text
    go test -bench=. ./exercises/iteration/
@@ -188,7 +234,9 @@ Type it yourself. You're not looking for the "right answer" — you're growing t
 
 ### Stretch goals (ask your tutor to scaffold any)
 
-- Add a `count` of, say, `1000` as a benchmark and compare a `+=` version vs a `strings.Builder` version.
+- Reproduce this chapter's measurement: write a `strings.Builder` version of `Repeat` alongside your
+  `+=` one, benchmark both with `go test -bench=. -benchmem`, and see the ns/op and allocs/op gap
+  with your own numbers.
 - Write `Reverse(s string) string` using `range` (careful: ranging a string gives you *runes*).
 - Use `continue` to write `SumEvens(nums []int) int` that skips odd numbers.
 
@@ -196,10 +244,13 @@ Type it yourself. You're not looking for the "right answer" — you're growing t
 
 ## 🧠 Active recall — no peeking
 
-1. How many loop keywords does Go have, and how do you write a "while" loop with it?
-2. In `for i, v := range xs`, what are `i` and `v`? How do you ignore the index?
-3. What's the difference between `break` and `continue`?
-4. What does a benchmark measure, and how do you actually run one (it doesn't run with plain `go test`)?
+1. How many loop keywords does Go have, and what are the four grips?
+2. How do you write a "while" loop in Go?
+3. In `for i, v := range xs`, what are `i` and `v`? How do you ignore the index?
+4. What's the difference between `break` and `continue`?
+5. What does a benchmark measure, and how do you actually run one (it doesn't run with plain `go test`)?
+6. Why is `+=` on a string in a long loop slow — and what did the benchmark numbers show
+   `strings.Builder` doing about it?
 
 ---
 
@@ -219,9 +270,12 @@ standard library.
 - `range` gives you **index + value**; `_` discards what you don't need.
 - `break` exits, `continue` skips a pass.
 - The Go 1.22+ **per-iteration loop variable** killed the classic capture bug — one less thing to fear.
-- A **benchmark** (`func BenchmarkX(b *testing.B)`, run with `go test -bench=.`) measures speed in ns/op.
+- A **benchmark** (`func BenchmarkX(b *testing.B)`, run with `go test -bench=.`) measures speed in
+  ns/op; `-benchmem` adds allocations.
+- Strings are **immutable**, so looped `+=` copies the whole string every pass — and a benchmark
+  *proved* `strings.Builder` ~14× faster instead of asking you to believe it.
 
-✅ **Done when:** `go test ./exercises/iteration/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/iteration/` is GREEN and you can answer the recall questions.
 
 **Next:** Chapter 3 — *Arrays & slices*, where `range` earns its keep and we meet Go's most-used
 collection.
