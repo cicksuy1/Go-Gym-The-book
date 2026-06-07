@@ -12,22 +12,26 @@ interface MarkdownProps {
   compact?: boolean
 }
 
+// Block elements carry dir="auto" so each one picks its direction from its own
+// text (first strong character) — Hebrew prose renders RTL, English LTR, in the
+// same message. Code is pinned dir="ltr"; logical utilities (ps-*, border-s-*,
+// text-start) let indents and borders flip with the resolved direction.
 const components: Components = {
   h1: ({ children }) => (
-    <h1 className="mt-2 mb-4 text-3xl font-bold tracking-tight text-zinc-50">
+    <h1 dir="auto" className="mt-2 mb-4 text-3xl font-bold tracking-tight text-zinc-50">
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="mt-8 mb-3 border-b border-zinc-800 pb-2 text-2xl font-semibold text-zinc-100">
+    <h2 dir="auto" className="mt-8 mb-3 border-b border-zinc-800 pb-2 text-2xl font-semibold text-zinc-100">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mt-6 mb-2 text-xl font-semibold text-zinc-100">{children}</h3>
+    <h3 dir="auto" className="mt-6 mb-2 text-xl font-semibold text-zinc-100">{children}</h3>
   ),
   p: ({ children }) => (
-    <p className="my-4 leading-7 text-zinc-300">{children}</p>
+    <p dir="auto" className="my-4 leading-7 text-zinc-300">{children}</p>
   ),
   a: ({ children, href }) => (
     <a
@@ -40,14 +44,14 @@ const components: Components = {
     </a>
   ),
   ul: ({ children }) => (
-    <ul className="my-4 list-disc space-y-1 pl-6 text-zinc-300">{children}</ul>
+    <ul dir="auto" className="my-4 list-disc space-y-1 ps-6 text-zinc-300">{children}</ul>
   ),
   ol: ({ children }) => (
-    <ol className="my-4 list-decimal space-y-1 pl-6 text-zinc-300">{children}</ol>
+    <ol dir="auto" className="my-4 list-decimal space-y-1 ps-6 text-zinc-300">{children}</ol>
   ),
   li: ({ children }) => <li className="leading-7">{children}</li>,
   blockquote: ({ children }) => (
-    <blockquote className="my-5 rounded-r-md border-l-4 border-emerald-600 bg-emerald-950/30 py-1 pr-3 pl-4 text-zinc-300 italic">
+    <blockquote dir="auto" className="my-5 rounded-e-md border-s-4 border-emerald-600 bg-emerald-950/30 py-1 pe-3 ps-4 text-zinc-300 italic">
       {children}
     </blockquote>
   ),
@@ -68,12 +72,12 @@ const components: Components = {
   ),
   tr: ({ children }) => <tr>{children}</tr>,
   th: ({ children }) => (
-    <th className="border-b border-zinc-700 px-3 py-2 text-left font-semibold tracking-wide">
+    <th dir="auto" className="border-b border-zinc-700 px-3 py-2 text-start font-semibold tracking-wide">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="px-3 py-2 align-top leading-6">{children}</td>
+    <td dir="auto" className="px-3 py-2 align-top leading-6">{children}</td>
   ),
   code: ({ className, children }) => {
     const isBlock = className?.includes('language-')
@@ -82,13 +86,13 @@ const components: Components = {
       return <code className={className}>{children}</code>
     }
     return (
-      <code className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-[0.85em] text-emerald-300">
+      <code dir="ltr" className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-[0.85em] text-emerald-300">
         {children}
       </code>
     )
   },
   pre: ({ children }) => (
-    <pre className="my-5 overflow-x-auto rounded-lg border border-zinc-800 bg-[#0b0f14] p-4 text-sm leading-6">
+    <pre dir="ltr" className="my-5 overflow-x-auto rounded-lg border border-zinc-800 bg-[#0b0f14] p-4 text-sm leading-6">
       {children}
     </pre>
   ),

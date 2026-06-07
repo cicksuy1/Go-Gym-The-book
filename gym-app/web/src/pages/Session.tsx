@@ -247,7 +247,11 @@ export function Session({ slug, title, onBack }: SessionProps) {
                 <div key={i}>
                   {divider}
                   <div className={`flex justify-end ${dim}`}>
-                    <div className="max-w-[80%] rounded-2xl rounded-br-sm border border-emerald-800/60 bg-emerald-950/30 px-4 py-2 text-sm whitespace-pre-wrap text-zinc-100">
+                    {/* dir="auto": RTL messages (e.g. Hebrew) right-align inside the bubble */}
+                    <div
+                      dir="auto"
+                      className="max-w-[80%] rounded-2xl rounded-br-sm border border-emerald-800/60 bg-emerald-950/30 px-4 py-2 text-sm whitespace-pre-wrap text-zinc-100"
+                    >
                       {turn.text}
                     </div>
                   </div>
@@ -287,6 +291,7 @@ export function Session({ slug, title, onBack }: SessionProps) {
         <div className="mx-auto max-w-3xl">
           <div className="flex items-end gap-3">
             <textarea
+              dir="auto"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
