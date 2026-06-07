@@ -27,6 +27,15 @@ storytelling** of [the Rust Book](https://doc.rust-lang.org/book/).
 4. **(Optional) The Gym GUI** ([`gym-app/`](gym-app/README.md)) — a local web app that puts the same
    conductor conversation in your browser, with streaming replies, live progress, and celebrations.
 
+> **Note:** the Gym GUI currently works with **Claude Code only** — it runs on the Claude Agent SDK
+> and reuses your local Claude Code login. The course itself still works with any agent that reads
+> `AGENTS.md`.
+
+![The Go Gym GUI — the conductor chat in your browser](gym-app/docs/session.png)
+
+The chat auto-detects text direction per message — learn in Hebrew (or any RTL language) and the
+prose renders right-to-left while Go code stays left-to-right.
+
 Every module follows the same loop: **why-first → tiny example → make the test green → recall quiz →
 real code in the wild.**
 
@@ -81,8 +90,8 @@ Your agent reads `AGENTS.md`, sees you're at Module 1, and begins. From then on:
 ### Four ways to start
 - **Any agent:** it auto-reads `AGENTS.md`; just say *"start the Go Gym."*
 - **Claude Code:** run the **`/go-gym`** skill — it shows where you are and drives the next module.
-- **Prefer a GUI?** `task setup && task app`, then open `http://localhost:4600` for the tutor chat —
-  see [`gym-app/README.md`](gym-app/README.md).
+- **Prefer a GUI?** `task setup && task app`, then open `http://localhost:4600` for the tutor chat
+  (Claude Code required) — see [`gym-app/README.md`](gym-app/README.md).
 - **Prefer reading first?** Follow this README, `mdbook serve book`, and let your agent take it from there.
 
 ## One command each: the Taskfile 🛠️

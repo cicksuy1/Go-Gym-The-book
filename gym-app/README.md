@@ -11,6 +11,13 @@ conductor's markdown turns and pipes your typed replies back. The server adds **
 logic of its own** — it only pipes the conversation, logs every turn, watches your progress file, and
 guards what tools the tutor may use.
 
+> ⚠️ **Claude Code only (for now):** the GUI runs on the
+> [Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk/overview) and reuses your local
+> Claude Code installation and login — without Claude Code installed and authenticated, the tutor
+> session can't start. The course itself (the terminal flow) works with any agent that reads
+> `AGENTS.md`. What porting the GUI to other providers would take is scoped in
+> [`docs/llm-portability.md`](docs/llm-portability.md).
+
 > 📜 **`CONTRACT.md` is the source of truth for every interface in this app** (REST routes, SSE
 > events, tool policy). Change that file first; code follows.
 
@@ -34,6 +41,24 @@ guards what tools the tutor may use.
  The course repo  (AGENTS.md rules · lessons/ · exercises/ · gym-ui + gym-memory skills ·
                    progress/NOTES.local.md = the tutor's long-term memory of the learner)
 ```
+
+## Screenshots
+
+The dashboard — your progress, the module map, and the graduation bars:
+
+![Dashboard — module list and progress](docs/dashboard.png)
+
+A module session — the conductor teaches, quizzes, runs the real `go test`, and gates on GREEN:
+
+![Session — the conductor chat with a quiz, a go test run, and the GREEN gate](docs/session.png)
+
+The same chat mixing Hebrew and English:
+
+![Session — the conductor chat, mixed Hebrew/English with a Go code block](docs/session-rtl.png)
+
+The chat auto-detects text direction **per message** (`dir="auto"`): Hebrew or any RTL prose
+renders right-to-left while code blocks and inline code stay left-to-right — no language setting
+needed (see `web/src/components/Markdown.tsx` and `web/src/pages/Session.tsx`).
 
 ## Prerequisites
 
