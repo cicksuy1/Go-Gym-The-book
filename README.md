@@ -44,8 +44,14 @@ The full per-chapter list and statuses live in **[`CURRICULUM.md`](CURRICULUM.md
 
 ## Quickstart
 
-**Prerequisites:** [Go](https://go.dev/dl/) 1.26+, an AI coding agent, and (optional, to read the book in a
-browser) [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html).
+**Prerequisites:** [Go](https://go.dev/dl/) 1.26+, an AI coding agent, and optionally:
+[mdBook](https://rust-lang.github.io/mdBook/guide/installation.html) (read the book in a browser) and
+[go-task](https://taskfile.dev/installation/) (one-command shortcuts — see *One command each: the Taskfile* below).
+
+```bash
+winget install Task.Task   # Windows          (or: choco install go-task)
+brew install go-task       # macOS / Linuxbrew
+```
 
 mdBook is only needed if you want to read the book locally — the course itself runs through your AI agent
 and `go test`. Install it whichever way suits you:
@@ -79,9 +85,23 @@ Your agent reads `AGENTS.md`, sees you're at Module 1, and begins. From then on:
   see [`gym-app/README.md`](gym-app/README.md).
 - **Prefer reading first?** Follow this README, `mdbook serve book`, and let your agent take it from there.
 
-> 🛠️ A [`Taskfile.yml`](Taskfile.yml) covers the common commands — `task --list` shows them all
-> (`task up` serves the book **and** the GUI together; `task test SLUG=arrays` runs one module's rep).
-> Needs [go-task](https://taskfile.dev/installation/).
+## One command each: the Taskfile 🛠️
+
+The repo ships a [`Taskfile.yml`](Taskfile.yml) so every common move is one command
+(needs [go-task](https://taskfile.dev/installation/) — see prerequisites above):
+
+| Command | What it does |
+|---------|--------------|
+| `task --list` | Show every available command. |
+| `task setup` | One-time install for the Gym GUI (server + web deps). |
+| `task up` | Serve the book (`:3000`) **and** the Gym GUI (`:4600`) together. |
+| `task app` / `task app:dev` | Run just the GUI (production / dev with hot reload). |
+| `task book` / `task book:build` | Serve / build the book. |
+| `task test SLUG=arrays` | Run *your* rep for one module — red until you make it green. |
+| `task qa` | Author gates: vet + reference solutions GREEN + book builds clean. |
+
+No go-task? Everything also works as plain commands — `go test ./exercises/<module>/`,
+`mdbook serve book`, and `npm run start` inside `gym-app/`.
 
 ## Curriculum & progress
 
