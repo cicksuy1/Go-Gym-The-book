@@ -49,6 +49,21 @@ upcoming ones are greyed-out drafts, so the whole road is always in view:
 - **Part 3 — Build an Application:** put it all together into a small but complete app.
 - **Part 4 — Q&A + Meta:** the sharper corners, and the anti-patterns worth avoiding.
 
+## Running the gym
+
+The course lives in a Git repo you train inside of: clone it, open it with your AI agent, and say
+*"start the Go Gym."* The repo ships a `Taskfile.yml` so the common moves are one command each
+(needs [go-task](https://taskfile.dev/installation/)):
+
+| Command | What it does |
+|---------|--------------|
+| `task --list` | Show every available command. |
+| `task up` | Serve this book at `localhost:3000` **and** the Gym GUI at `localhost:4600`, together. |
+| `task test SLUG=arrays` | Run *your* rep for one module — red until you make it green. |
+| `task setup` | One-time install for the Gym GUI (the in-browser tutor chat — see `gym-app/`). |
+
+No go-task? Everything also works as plain `go test ./exercises/<module>/` and `mdbook serve book`.
+
 ## Where am I?
 
 Your progress lives in `progress/PROGRESS.local.md`, which your AI tutor keeps updated as you go — close
