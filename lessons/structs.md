@@ -92,6 +92,25 @@ idea down. On to behaviour.
 
 ## Methods: behaviour with a value receiver
 
+Before the syntax, feel the problem methods solve. Suppose we have a `Rectangle` and a `Circle`, and
+both need an area calculation. The obvious move is two functions:
+
+```go
+func Area(r Rectangle) float64 { return r.Width * r.Height }
+func Area(c Circle) float64    { return math.Pi * c.Radius * c.Radius }
+```
+
+```text
+Area redeclared in this block
+	other declaration of Area
+```
+
+It doesn't compile. Some languages let two functions share a name as long as their parameters differ —
+Go deliberately does not: one package, one `Area`. You could rename them `RectangleArea` and
+`CircleArea`… or you could use Go's actual answer: hang the function **on the type itself**. A
+`Rectangle` gets *its* `Area`; a `Circle` gets *its own* `Area`; no collision, because each one lives
+with its type. That's a **method**.
+
 A method is just a function with **one extra piece** bolted on the front: a **receiver**. The receiver is
 what ties the function to a type. Here's the anatomy:
 
@@ -109,10 +128,12 @@ func (r Rectangle) Area() float64 {
 }
 ```
 
-Compare it to an ordinary function. A plain function would be `func Area(r Rectangle) float64` — the
-rectangle goes in the parentheses as a normal parameter. A **method** moves that parameter *out front*
-into `(r Rectangle)`, and now you call it with a dot: `r.Area()` instead of `Area(r)`. Same idea, nicer
-to read.
+Compare it to the ordinary function it replaced: `func Area(r Rectangle) float64` had the rectangle in
+the parentheses as a normal parameter. A **method** moves that parameter *out front* into
+`(r Rectangle)`, and now you call it with a dot: `r.Area()` instead of `Area(r)`. Two wins at once: the
+name collision is gone (each type carries its own `Area`), and the call reads like English — "the
+rectangle's area," which is how we say it out loud anyway. (One convention you'll see everywhere: the
+receiver's name is the first letter of its type — `r` for `Rectangle`, `c` for `Circle`.)
 
 Inside the method, `r` is *that* rectangle, and you read its fields the same way as always: `r.Width`,
 `r.Height`.
@@ -144,6 +165,15 @@ Read it as a promise of **capability**: *"a `Shape` is anything that can give me
 `Perimeter()`, both returning `float64`."* Notice what's **not** here: no fields, no actual code, no
 mention of `Rectangle` or `Circle`. The interface doesn't know who has these methods — and that's the
 whole point.
+
+```text
+              Shape asks: "Area() float64?  Perimeter() float64?"
+                               │
+            ┌──────────────────┼──────────────────┐
+       Rectangle ✓✓        Circle ✓✓          string ✗
+       (has both —         (has both —        (has neither —
+        IS a Shape)         IS a Shape)        is not)
+```
 
 Does `Rectangle` count as a `Shape`? Look at the method we just wrote: a `Rectangle` has an `Area()
 float64`. Give it a `Perimeter() float64` too, and it has *both* methods the interface asked for. So it
@@ -230,9 +260,20 @@ keep: you write the loop once, and it works for every shape — present and futu
 understand: **you can't compare floats with `==` and trust it.**
 
 Floating-point numbers are stored in binary, and most decimals can't be represented exactly — the same
-way `1/3` can't be written exactly in decimal (`0.3333…` never ends). So a calculation that *should* give
-`314.159…` might land a hair off, and `got == want` would fail for a number that's correct to fifteen
-digits. The fix is to check that the two numbers are **close enough**:
+way `1/3` can't be written exactly in decimal (`0.3333…` never ends). Don't take that on faith; run it:
+
+```go
+a, b := 0.1, 0.2
+fmt.Println(a+b == 0.3)      // false (!)
+fmt.Printf("%.17f\n", a+b)   // 0.30000000000000004
+```
+
+One tenth plus two tenths is *not* three tenths — not in binary, not quite. (Fun footnote: write it as
+bare constants, `0.1+0.2 == 0.3`, and Go says `true` — constant arithmetic happens at compile time with
+exact precision. The lie only appears once real `float64` variables get involved, which is exactly
+where your calculations live.) So a computation that *should* give `314.159…` might land a hair off,
+and `got == want` would fail for a number that's correct to fifteen digits. The fix is to check that
+the two numbers are **close enough**:
 
 ```go
 const tol = 1e-9 // tolerance: "close enough" for floats (0.000000001)
@@ -304,11 +345,14 @@ fingers move.
 ## 🧠 Active recall — answer out loud, no peeking
 
 1. What is a **struct**, and what is the zero value of `Rectangle{}` — field by field?
-2. What is a **receiver**, and where does it go in a method declaration?
-3. What does an **interface** declaration contain — and just as important, what does it *not* contain?
-4. How does `Circle` come to count as a `Shape` — what did you have to write to "register" it as one?
-5. Why does the test compare floats with `math.Abs(got-want) > tol` instead of `got != want`?
-6. Bonus: what does `[]Shape` let you do that `[]Rectangle` can't?
+2. Two plain functions named `Area` — one for `Rectangle`, one for `Circle` — won't compile
+   (`Area redeclared in this block`). How do methods make the same name legal twice?
+3. What is a **receiver**, and where does it go in a method declaration?
+4. What does an **interface** declaration contain — and just as important, what does it *not* contain?
+5. How does `Circle` come to count as a `Shape` — what did you have to write to "register" it as one?
+6. Why does the test compare floats with `math.Abs(got-want) > tol` instead of `got != want` — and
+   what did `0.1 + 0.2` actually print?
+7. Bonus: what does `[]Shape` let you do that `[]Rectangle` can't?
 
 If any answer is fuzzy, scroll back up — that's the recall doing its job, not failure.
 
@@ -340,6 +384,8 @@ built on the exact idea you just learned: **if it has the methods, it IS the int
   value**.
 - A **method** is a function with a **receiver**; a **value receiver** gets a *copy* and is perfect for
   read-only methods like `Area()`. (The pointer receiver — for changing the original — waits for Chapter 5.)
+- Methods exist for a concrete reason: two plain functions can't share a name in one package
+  (`Area redeclared in this block`) — but every type can carry its **own** `Area`.
 - An **interface** is a list of methods a type must have — a set of capabilities.
 - Go satisfies interfaces **automatically**: no `implements`, no inheritance. **If a type has the methods,
   it IS the interface.** This lets you **accept interfaces** and stay open to types you haven't written yet.
