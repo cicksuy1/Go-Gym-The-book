@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "book/**"
+      - "lessons/**"
+      - "CURRICULUM.md"
       - ".github/workflows/deploy-book.yml"
   workflow_dispatch:
 
