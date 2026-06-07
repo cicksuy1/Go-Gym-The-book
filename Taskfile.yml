@@ -1,0 +1,75 @@
+# The Go Gym — task runner (https://taskfile.dev)
+#
+# go-task ships its own POSIX shell interpreter, so these commands run the same
+# on Windows, macOS, and Linux. Run `task --list` (or just `task`) to see everything.
+#
+# Note there is NO bare `go test ./...` task on purpose: exercise stubs are
+# RED by design until the learner solves them (that's the AGENTS.md gate).
+# Use `task test SLUG=<module>` for your rep, `task qa` for author gates.
+version: "3"
+
+tasks:
+  default:
+    desc: List all tasks
+    silent: true
+    cmds:
+      - task --list
+
+  setup:
+    desc: Install gym-app dependencies (server + web)
+    cmds:
+      - npm install --prefix gym-app
+      - npm install --prefix gym-app/web
+
+  up:
+    desc: "Serve the whole gym: the book on :3000 AND the gym app on :4600"
+    deps: [book, app]
+
+  app:
+    desc: Run the Gym GUI (builds the frontend, serves on http://localhost:4600)
+    dir: gym-app
+    cmds:
+      - npm run start
+
+  app:dev:
+    desc: Run the Gym GUI in dev mode (Express :4600 + Vite HMR :5173)
+    dir: gym-app
+    cmds:
+      - npm run dev
+
+  app:test:
+    desc: Run the gym-app server unit tests
+    dir: gym-app
+    cmds:
+      - node --test "server/*.test.mjs"
+
+  app:lint:
+    desc: Lint the gym-app frontend
+    dir: gym-app
+    cmds:
+      - npm --prefix web run lint
+
+  book:
+    desc: Serve the book at http://localhost:3000
+    cmds:
+      - mdbook serve book --port 3000
+
+  book:build:
+    desc: Build the book into book/book/
+    cmds:
+      - mdbook build book
+
+  test:
+    desc: "Run YOUR rep for one module: task test SLUG=arrays"
+    requires:
+      vars: [SLUG]
+    cmds:
+      - go test ./exercises/{{.SLUG}}/
+
+  qa:
+    desc: "Author QA gates: vet + reference solutions GREEN + book builds clean"
+    cmds:
+      - go vet ./exercises/...
+      - go vet -tags solution ./exercises/...
+      - go test -tags solution ./exercises/...
+      - mdbook build book
