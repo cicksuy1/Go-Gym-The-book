@@ -45,7 +45,8 @@ category of bugs simply cannot happen.
 > If you've touched Rust, this will feel familiar: `let age: i32 = 34;` is the same promise. Go and
 > Rust disagree about many things, but they agree that **types catch bugs at compile time, for free.**
 
-Hold onto this sentence, because it's the spine of the entire book:
+Hold onto this sentence — it's this chapter's mental model and the spine of the entire book. Every
+section below is this one idea wearing different clothes:
 
 > **A type is a contract. The compiler is the enforcer.**
 
@@ -170,8 +171,24 @@ Four things are happening in that first line, and they're the whole point of the
   type. If you're coming from C or Java, this ordering feels backwards for about a day, then never again.
 
 That signature is a contract in the exact sense we said: *the compiler will reject any caller who
-breaks it.* `Add(2, 4)` is fine. `Add(2, "four")` won't compile. You get that safety for free, before
-the program ever runs.
+breaks it.* `Add(2, 4)` is fine. Try to break the contract and watch the enforcer step in:
+
+```go
+Add(2, "four")
+```
+
+```text
+cannot use "four" (untyped string constant) as int value in argument to Add
+```
+
+Read that error slowly — it's the contract being enforced, in plain words: *you promised me an int,
+and this isn't one.* The program never ran; the bug never got the chance to exist. You'll spend your
+whole Go career being protected like this, and errors like that one are worth learning to read calmly
+— they always name exactly which promise was broken.
+
+**Checkpoint:** a type is a contract, the compiler is the enforcer — for variables (`age = "old"`
+won't compile), for sizes (overflow wraps, so pick widths deliberately), and for functions (the
+signature promises what goes in and what comes out, and callers who lie don't compile).
 
 ---
 
@@ -280,7 +297,13 @@ func Add(x, y int) int {
    ```text
    go test ./exercises/integers/ -v
    ```
-   *(run it from the `go-gym` folder)*
+   *(run it from the `go-gym` folder)* — you'll see your first real failure report:
+   ```text
+   --- FAIL: TestAdd/two_positives
+       integers_test.go:25: Add(2, 4) = 0; want 6
+   ```
+   Read it the way you'll read a thousand of these: the test called `Add(2, 4)`, got `0`, wanted
+   `6`. Everything you need to fix the bug, in one line.
 2. Fix the one line so `Add` actually adds.
 3. Run again. Watch RED turn **GREEN**. That little dopamine hit is the engine of this whole course.
 
@@ -297,10 +320,13 @@ when your fingers move.
 
 ## 🧠 Active recall — answer out loud, no peeking
 
-1. In `func Add(x, y int) int`, **which `int` is the return type**, and which are the parameters?
-2. Why won't `Add(2, "four")` compile — and is that error caught *before* or *while* the program runs?
-3. What does `go test` actually *do* with the `// Output: 6` line?
-4. Bonus: what does `var n int` equal before you assign anything, and why does Go guarantee that?
+1. What's this chapter's one-sentence mental model — and name two different places you saw the
+   compiler enforce a contract.
+2. In `func Add(x, y int) int`, **which `int` is the return type**, and which are the parameters?
+3. Why won't `Add(2, "four")` compile — and is that error caught *before* or *while* the program runs?
+4. A `uint8` holding 255 gets `+ 1`. What does it hold now, and why was there no error?
+5. What does `go test` actually *do* with the `// Output: 6` line?
+6. Bonus: what does `var n int` equal before you assign anything, and why does Go guarantee that?
 
 If any answer is fuzzy, scroll back up — that's not failure, that's the recall doing its job.
 
@@ -328,7 +354,7 @@ because real code cares about them — the "a type is a promise" idea you just m
   (**RED → GREEN → REFACTOR**).
 - **Example functions** are tests and documentation at once.
 
-✅ **Done when:** `go test ./exercises/integers/` is GREEN and you can answer the four recall questions.
+✅ **Done when:** `go test ./exercises/integers/` is GREEN and you can answer the recall questions.
 
 **Next:** Chapter 2 — *Iteration*, where a single keyword (`for`) is Go's *only* loop, and we meet
 benchmarks.
