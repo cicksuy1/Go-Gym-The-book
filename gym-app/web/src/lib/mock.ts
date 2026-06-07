@@ -7,8 +7,10 @@
 
 import type {
   Curriculum,
+  HistoryTurn,
   Progress,
   TutorEventType,
+  TutorModel,
   TutorStatus,
 } from './types'
 import type { GymApi } from './api'
@@ -118,6 +120,30 @@ const progress: Progress = {
 const MOCK_SESSION_ID = 'mock-7f3a9c21-arrays'
 let started = false
 let sessionCostUsd = 0.18
+let currentModel: TutorModel = 'sonnet'
+
+// A tiny canned history for one slug so the dimmed "review" style is visible.
+const mockHistory: Record<string, HistoryTurn[]> = {
+  integers: [
+    {
+      kind: 'tutor',
+      text:
+        '## Integers 🟢 — welcome back\n\nLast time you nailed `Add`. This log is read-only — open a fresh rep any time.',
+      ts: 1_750_000_000_000,
+    },
+    { kind: 'learner', text: 'return a + b', ts: 1_750_000_060_000 },
+    {
+      kind: 'activity',
+      text: '🧪 go test ./exercises/integers/',
+      ts: 1_750_000_120_000,
+    },
+    {
+      kind: 'tutor',
+      text: 'GREEN! 🟩 That was the rep. Marked ✅.',
+      ts: 1_750_000_180_000,
+    },
+  ],
+}
 
 // --- scripted conductor turns ----------------------------------------------
 
@@ -196,14 +222,36 @@ export const mockApi: GymApi = {
   tutorStatus: () =>
     new Promise<TutorStatus>((r) =>
       setTimeout(
-        () => r({ state: started ? 'online' : 'starting', sessionId: MOCK_SESSION_ID }),
+        () =>
+          r({
+            state: started ? 'online' : 'starting',
+            sessionId: MOCK_SESSION_ID,
+            slug: 'arrays',
+            model: currentModel,
+          }),
         150,
       ),
     ),
 
-  sessionStart: async (_slug) => {
+  history: (slug) =>
+    new Promise((r) =>
+      setTimeout(() => r({ turns: mockHistory[slug] ?? [] }), 150),
+    ),
+
+  setModel: async (model) => {
+    currentModel = model
+    return { model, appliesOn: 'next_session' }
+  },
+
+  sessionStart: async (slug, opts) => {
     started = true
-    // Conductor opens the module with its welcome turn.
+    // Announce the (re)started conversation, then stream the welcome turn.
+    mockEvents.emit('session_changed', {
+      slug,
+      sessionId: MOCK_SESSION_ID,
+      model: currentModel,
+      fresh: opts?.fresh ?? false,
+    })
     setTimeout(() => streamTurn(WELCOME_TURN, () => bumpCost(0.04)), 400)
   },
 

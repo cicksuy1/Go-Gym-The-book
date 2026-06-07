@@ -62,9 +62,24 @@ export interface Progress {
 
 export type TutorState = 'starting' | 'online' | 'dead'
 
+// Claude Code model aliases the conductor can run on (applies on next session).
+export type TutorModel = 'opus' | 'sonnet' | 'haiku'
+
 export interface TutorStatus {
   state: TutorState
   sessionId: string | null
+  slug: string | null
+  model: TutorModel | null
+}
+
+// --- Tutor history (replayable per-module chat log) ---
+
+export type TurnKind = 'tutor' | 'learner' | 'activity'
+
+export interface HistoryTurn {
+  kind: TurnKind
+  text: string
+  ts: number
 }
 
 // --- Test (manual run, broadcast over SSE) ---
@@ -107,10 +122,19 @@ export interface CostUpdateEvent {
   totalCostUsd: number
 }
 
+// A conversation started (fresh) or resumed (fresh: false) for a module.
+export interface SessionChangedEvent {
+  slug: string
+  sessionId: string | null
+  model: TutorModel | null
+  fresh: boolean
+}
+
 export interface TutorEventMap {
   tutor_partial: TutorPartialEvent
   tutor_message: TutorMessageEvent
   tool_activity: ToolActivityEvent
+  session_changed: SessionChangedEvent
   test_result: TestResultEvent
   module_complete: ModuleCompleteEvent
   celebrate: CelebrateEvent

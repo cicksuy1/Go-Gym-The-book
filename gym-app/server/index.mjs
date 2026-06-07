@@ -19,7 +19,7 @@ app.get('/api/health', (_req, res) => {
 
 // Routers live in their own modules so parallel work never collides here.
 const { default: contentRouter } = await import('./routes.mjs');
-const { tutorRouter, broadcast, startTutor } = await import('./tutor.mjs');
+const { tutorRouter, broadcast, startTutor, notifyModuleComplete } = await import('./tutor.mjs');
 const { readProgress } = await import('./progress.mjs');
 app.use('/api', contentRouter);
 app.use('/api/tutor', tutorRouter);
@@ -48,6 +48,8 @@ try {
         if (!known.has(slug)) {
           broadcast('module_complete', { slug });
           broadcast('celebrate', { reason: 'module_complete' });
+          // Nudge the live conductor to record its gym-memory notes block.
+          notifyModuleComplete(slug);
         }
       }
       known = now;
@@ -67,6 +69,7 @@ app.get(/^\/(?!api\/).*/, (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Go Gym GUI server on http://localhost:${PORT}`);
-  // Open the conductor conversation eagerly so the tutor is visibly online.
-  startTutor();
+  // Warm the learner's current module if .session.json records one (resume case).
+  // A fresh install starts no conversation until the first POST /session/start.
+  startTutor().catch((err) => console.error('tutor: startup failed:', err.message));
 });

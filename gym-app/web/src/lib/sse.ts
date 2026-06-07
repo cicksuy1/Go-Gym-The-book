@@ -35,6 +35,7 @@ const EVENT_TYPES: TutorEventType[] = [
   'tutor_partial',
   'tutor_message',
   'tool_activity',
+  'session_changed',
   'test_result',
   'module_complete',
   'celebrate',

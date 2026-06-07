@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { evaluateToolUse } from './tutor.mjs';
+import { evaluateToolUse, isValidModel, normalizeSessionRecord, mergeSessionRecord } from './tutor.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -92,6 +92,28 @@ test('Write with no file_path is denied', () => {
   deny('Write', { file_path: '' });
 });
 
+// --- Edit / Write: NOTES.local.md (gym-memory) ----------------------------
+
+test('Edit on progress/NOTES.local.md (forward slashes) is allowed', () => {
+  allow('Edit', { file_path: 'progress/NOTES.local.md' });
+});
+
+test('Write on NOTES.local.md via absolute repo path is allowed', () => {
+  allow('Write', { file_path: path.join(REPO_ROOT, 'progress', 'NOTES.local.md') });
+});
+
+test('Edit on NOTES.local.md with back slashes is allowed', () => {
+  allow('Edit', { file_path: 'progress\\NOTES.local.md' });
+});
+
+test('Edit on the NOTES template (not .local) is denied', () => {
+  deny('Edit', { file_path: 'progress/NOTES.template.md' });
+});
+
+test('Edit on an arbitrary repo file (README.md) is still denied', () => {
+  deny('Edit', { file_path: 'README.md' });
+});
+
 // --- *_solution.go is sealed across every tool ----------------------------
 
 test('Read on a _solution.go file is denied', () => {
@@ -134,4 +156,80 @@ test('Skill is allowed', () => {
 
 test('an unlisted tool (WebFetch) is denied', () => {
   deny('WebFetch', { url: 'https://example.com' });
+});
+
+// --- Model validation (pure helper, no HTTP) ------------------------------
+
+test('isValidModel accepts the three Claude Code aliases', () => {
+  assert.equal(isValidModel('opus'), true);
+  assert.equal(isValidModel('sonnet'), true);
+  assert.equal(isValidModel('haiku'), true);
+});
+
+test('isValidModel rejects unknown strings, non-strings, and empty', () => {
+  assert.equal(isValidModel('gpt-4'), false);
+  assert.equal(isValidModel('OPUS'), false);
+  assert.equal(isValidModel(''), false);
+  assert.equal(isValidModel(undefined), false);
+  assert.equal(isValidModel(null), false);
+  assert.equal(isValidModel(42), false);
+});
+
+// --- Session record: normalize + merge (pure helpers, no disk) -------------
+
+test('normalizeSessionRecord passes a v1.2.1 map shape through', () => {
+  const rec = normalizeSessionRecord({
+    current: 'structs',
+    model: 'sonnet',
+    sessions: { integers: 'id-a', structs: 'id-b' },
+  });
+  assert.deepEqual(rec, {
+    current: 'structs',
+    model: 'sonnet',
+    sessions: { integers: 'id-a', structs: 'id-b' },
+  });
+});
+
+test('normalizeSessionRecord migrates the v1.2 single-module shape', () => {
+  const rec = normalizeSessionRecord({ slug: 'integers', session_id: 'id-a', model: 'opus' });
+  assert.deepEqual(rec, { current: 'integers', model: 'opus', sessions: { integers: 'id-a' } });
+});
+
+test('normalizeSessionRecord treats the legacy {session_id} shape as nothing resumable', () => {
+  const rec = normalizeSessionRecord({ session_id: 'id-a' });
+  assert.deepEqual(rec, { current: null, model: null, sessions: {} });
+});
+
+test('normalizeSessionRecord tolerates junk: non-objects, bad ids, bad model', () => {
+  assert.deepEqual(normalizeSessionRecord(null), { current: null, model: null, sessions: {} });
+  assert.deepEqual(normalizeSessionRecord('nope'), { current: null, model: null, sessions: {} });
+  const rec = normalizeSessionRecord({
+    current: 'maps',
+    model: 'gpt-4',
+    sessions: { maps: 42, sync: '', pointers: 'id-ok' },
+  });
+  assert.deepEqual(rec, { current: 'maps', model: null, sessions: { pointers: 'id-ok' } });
+});
+
+test('mergeSessionRecord updates one module without dropping the others', () => {
+  const before = { current: 'integers', model: 'sonnet', sessions: { integers: 'id-a' } };
+  const after = mergeSessionRecord(before, { current: 'structs', sessions: { structs: 'id-b' } });
+  assert.deepEqual(after, {
+    current: 'structs',
+    model: 'sonnet',
+    sessions: { integers: 'id-a', structs: 'id-b' },
+  });
+});
+
+test('mergeSessionRecord forget removes exactly one module session', () => {
+  const before = { current: 'integers', model: null, sessions: { integers: 'id-a', structs: 'id-b' } };
+  const after = mergeSessionRecord(before, { forget: 'integers' });
+  assert.deepEqual(after.sessions, { structs: 'id-b' });
+  assert.equal(after.current, 'integers');
+});
+
+test('mergeSessionRecord model-only patch leaves the session map untouched', () => {
+  const before = { current: 'integers', model: null, sessions: { integers: 'id-a' } };
+  const after = mergeSessionRecord(before, { model: 'haiku' });
+  assert.deepEqual(after, { current: 'integers', model: 'haiku', sessions: { integers: 'id-a' } });
 });

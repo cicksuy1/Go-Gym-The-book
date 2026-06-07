@@ -100,13 +100,19 @@ export function Dashboard({ onOpenModule }: DashboardProps) {
             {part.modules.map((mod) => {
               const status = moduleStatus(mod, progress)
               const kind = KIND_BADGE[mod.kind]
+              const isDone = status.label === 'done'
+              const title = !mod.written
+                ? 'Not written yet'
+                : isDone
+                  ? 'review — past chat will load'
+                  : 'Open in the conductor'
               return (
                 <li key={mod.slug}>
                   <button
                     type="button"
                     onClick={() => onOpenModule(mod.slug, `${mod.number} · ${mod.title}`)}
                     disabled={!mod.written}
-                    title={mod.written ? 'Open in the conductor' : 'Not written yet'}
+                    title={title}
                     className="group flex w-full items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors enabled:hover:border-emerald-700 enabled:hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span className="text-lg">{status.icon}</span>

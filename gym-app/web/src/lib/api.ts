@@ -4,7 +4,9 @@
 import type {
   ApiResponse,
   Curriculum,
+  HistoryTurn,
   Progress,
+  TutorModel,
   TutorStatus,
 } from './types'
 import { mockApi } from './mock'
@@ -40,11 +42,22 @@ async function post202(path: string, body: unknown): Promise<void> {
   })
 }
 
+export interface TutorHistory {
+  turns: HistoryTurn[]
+}
+
+export interface SetModelResult {
+  model: TutorModel
+  appliesOn: string
+}
+
 export interface GymApi {
   getCurriculum(): Promise<Curriculum>
   getProgress(): Promise<Progress>
   tutorStatus(): Promise<TutorStatus>
-  sessionStart(slug: string): Promise<void>
+  history(slug: string): Promise<TutorHistory>
+  setModel(model: TutorModel): Promise<SetModelResult>
+  sessionStart(slug: string, opts?: { fresh?: boolean }): Promise<void>
   sessionInput(text: string): Promise<void>
 }
 
@@ -52,7 +65,14 @@ const realApi: GymApi = {
   getCurriculum: () => request<Curriculum>('/curriculum'),
   getProgress: () => request<Progress>('/progress'),
   tutorStatus: () => request<TutorStatus>('/tutor/status'),
-  sessionStart: (slug) => post202('/tutor/session/start', { slug }),
+  history: (slug) =>
+    request<TutorHistory>(`/tutor/history/${encodeURIComponent(slug)}`),
+  setModel: (model) => request<SetModelResult>('/tutor/model', {
+    method: 'POST',
+    body: JSON.stringify({ model }),
+  }),
+  sessionStart: (slug, opts) =>
+    post202('/tutor/session/start', { slug, fresh: opts?.fresh ?? false }),
   sessionInput: (text) => post202('/tutor/session/input', { text }),
 }
 

@@ -2,11 +2,13 @@
 
 **A local web app that puts the real `/go-gym` tutor conversation in your browser.**
 
-This is not a chatbot wrapper. The server opens **one background Claude Code session** (via the
-[Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk/overview)) the moment it boots — the same
-conductor that runs the course in a terminal, loaded with the same `AGENTS.md` rules, skills, and
-gates. The web UI renders its markdown turns and pipes your typed replies back. The server adds **no
-grading or gate logic of its own** — it only pipes the conversation, watches your progress file, and
+This is not a chatbot wrapper. Each module gets its **own background Claude Code session** (via the
+[Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk/overview)) — the same conductor that runs
+the course in a terminal, loaded with the same `AGENTS.md` rules, skills, and gates. Opening a module
+starts (or resumes) *that module's* conversation; switching modules parks the old one — it resumes
+when you come back. At boot the server warms only the **current** module's conversation. The web UI renders the
+conductor's markdown turns and pipes your typed replies back. The server adds **no grading or gate
+logic of its own** — it only pipes the conversation, logs every turn, watches your progress file, and
 guards what tools the tutor may use.
 
 > 📜 **`CONTRACT.md` is the source of truth for every interface in this app** (REST routes, SSE
@@ -17,18 +19,20 @@ guards what tools the tutor may use.
 ```
  Browser (React 19 + Vite + Tailwind)
     │  ▲
-    │  │  REST  /api/*            (curriculum, progress, lesson, manual go-test)
-    │  │  SSE   /api/tutor/events (tutor_partial / tutor_message / tool_activity /
+    │  │  REST  /api/*            (curriculum, progress, lesson, history, model, manual go-test)
+    │  │  SSE   /api/tutor/events (tutor_partial / tutor_message / tool_activity / session_changed /
     │  │                           test_result / progress_changed / celebrate / cost_update)
     ▼  │
  Express server  :4600  (server/index.mjs)
     │  ▲                  • watches progress/PROGRESS.local.md → celebrations
+    │  │                  • tees every turn to gym-app/.chats/<slug>.jsonl (read-only history)
     │  │                  • serves web/dist in production
     ▼  │
  Claude Agent SDK conversation  (server/tutor.mjs)
-    │      one long-lived session · resumed across restarts via .session.json
+    │      one conversation per module · each resumes when reopened (.session.json session map)
     ▼
- The course repo  (AGENTS.md rules · lessons/ · exercises/ · gym-ui skill)
+ The course repo  (AGENTS.md rules · lessons/ · exercises/ · gym-ui + gym-memory skills ·
+                   progress/NOTES.local.md = the tutor's long-term memory of the learner)
 ```
 
 ## Prerequisites
@@ -72,8 +76,14 @@ From the repo root with go-task: `task app` (production), `task app:dev`, or **`
 the app *and* the mdBook together.
 
 - Override the port with `GYM_PORT` (default `4600`).
-- The tutor session **resumes across restarts**: the session id is stored in `gym-app/.session.json`
-  (gitignored). Delete that file to start a fresh conversation.
+- **Every module keeps its conversation**: `gym-app/.session.json` (gitignored) stores a map of
+  `{ current, model, sessions: { <slug>: <session_id> } }` — reopening a module **resumes** where it
+  left off (at boot only the *current* module is warmed; others resume lazily when opened). The
+  "Restart conversation" button forgets one module's session; delete the file to forget them all.
+- **Per-module chat logs:** every turn is teed to `gym-app/.chats/<slug>.jsonl` (gitignored). The UI
+  replays them when you reopen a module, so past conversations stay readable.
+- **Model picker:** the header `select` (opus / sonnet / haiku) chooses the conductor's model; it
+  applies on the **next** session start, never mid-conversation.
 - The server console prints `watch live: claude --resume <sessionId>` — run it in a terminal to
   observe (or join) the very same conversation the browser is showing.
 
@@ -97,24 +107,37 @@ The tutor session is pre-approved for a fixed tool list, enforced by a `canUseTo
 `server/tutor.mjs` (zero permission prompts, guards always on):
 
 - **Bash** — only `go test` / `go vet` on paths inside `./exercises/`
-- **Edit / Write** — only `progress/PROGRESS.local.md`; the tutor can never touch your stub or any
-  other file
+- **Edit / Write** — only `progress/PROGRESS.local.md` and `progress/NOTES.local.md`; the tutor can
+  never touch your stub or any other file
 - **`_solution` is radioactive** — any tool input containing it (case-insensitive) is denied, and
   Grep over exercise directories is blocked, so reference solutions can't leak into the conversation
 - Learner input is piped as plain conversation turns — the `gym-ui` skill instructs the conductor to
-  treat it as data, never as instructions
+  treat it as data, never as instructions; the `gym-memory` skill governs what may be written to
+  `progress/NOTES.local.md` (learner notes only, never solution content)
 
 All REST responses use the envelope `{ success, data, error }`; `:slug` params are validated against
 the curriculum.
+
+## Memory & history
+
+Conversations are scoped to a module so token costs stay bounded — the tutor never drags the whole
+course history into every reply. To keep continuity across those separate conversations, the conductor
+keeps **long-term memory of the *learner*** in `progress/NOTES.local.md`, governed by the `gym-memory`
+skill: it reads the notes at session start and appends a short block (weak spots, recall, pacing) when
+a module completes — never solution content. Separately, the server tees **every turn** to
+`gym-app/.chats/<slug>.jsonl`, giving *you* a read-only transcript of each module's conversation that
+the UI replays when you reopen a module. Learner memory is for the tutor; the chat logs are for you.
 
 ## Layout
 
 ```
 gym-app/
 ├── CONTRACT.md     ← interface source of truth (read this first)
+├── .chats/         per-module chat logs <slug>.jsonl (gitignored, read-only history)
 ├── server/         Express + Agent SDK host (.mjs, node:test specs alongside)
 │   ├── index.mjs   boot, static serving, progress watcher
 │   ├── tutor.mjs   the conversation host + tool guards + SSE
+│   ├── chatlog.mjs per-module .jsonl tee + history reader
 │   ├── routes.mjs  content API (curriculum / progress / lesson / test)
 │   └── …
 └── web/            React frontend (Vite + Tailwind 4 + react-markdown) — see web/README.md

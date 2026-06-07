@@ -3,10 +3,10 @@
 // transcript of rendered turns, and one always-active answer box.
 
 import { useEffect, useRef, useState } from 'react'
-import type { KeyboardEvent } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
 import { api } from '../lib/api'
 import { useTutor } from '../lib/TutorContext'
-import type { TutorState, TutorStatus } from '../lib/types'
+import type { TutorModel, TutorState, TutorStatus } from '../lib/types'
 import { Markdown } from '../components/Markdown'
 
 interface SessionProps {
@@ -21,12 +21,21 @@ const STATUS_STYLE: Record<TutorState, { label: string; cls: string }> = {
   dead: { label: '● offline', cls: 'text-rose-400' },
 }
 
+const MODEL_OPTIONS: { value: TutorModel; label: string }[] = [
+  { value: 'opus', label: 'Opus' },
+  { value: 'sonnet', label: 'Sonnet' },
+  { value: 'haiku', label: 'Haiku' },
+]
+
 const STATUS_POLL_MS = 3000
+const MODEL_HINT_MS = 4000
 
 function useTutorStatus(): TutorStatus {
   const [status, setStatus] = useState<TutorStatus>({
     state: 'starting',
     sessionId: null,
+    slug: null,
+    model: null,
   })
 
   useEffect(() => {
@@ -56,15 +65,49 @@ function useTutorStatus(): TutorStatus {
 }
 
 export function Session({ slug, title, onBack }: SessionProps) {
-  const { transcript, streaming, costUsd, addLearnerTurn } = useTutor()
+  const {
+    transcript,
+    streaming,
+    costUsd,
+    model,
+    addLearnerTurn,
+    resetTranscript,
+    loadHistory,
+  } = useTutor()
   const status = useTutorStatus()
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [modelHint, setModelHint] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const stickToBottom = useRef(true)
 
   const online = status.state === 'online'
+  // Prefer the live (context) model; fall back to the polled status.
+  const selectedModel = model ?? status.model
+
+  const onModelChange = async (
+    e: ChangeEvent<HTMLSelectElement>,
+  ): Promise<void> => {
+    const next = e.target.value as TutorModel
+    try {
+      await api.setModel(next)
+      setModelHint(true)
+      setTimeout(() => setModelHint(false), MODEL_HINT_MS)
+    } catch (error: unknown) {
+      console.error('Failed to set model', error)
+    }
+  }
+
+  const restartConversation = async (): Promise<void> => {
+    const ok = window.confirm(
+      'Start a fresh conversation for this module? The chat log stays readable.',
+    )
+    if (!ok) return
+    resetTranscript()
+    await loadHistory(slug)
+    await api.sessionStart(slug, { fresh: true })
+  }
 
   // Auto-stick to bottom unless the user scrolled up.
   useEffect(() => {
@@ -112,6 +155,38 @@ export function Session({ slug, title, onBack }: SessionProps) {
           ← Dashboard
         </button>
         <h1 className="flex-1 truncate font-semibold text-zinc-100">{title}</h1>
+        <div className="flex flex-col items-end">
+          <select
+            value={selectedModel ?? ''}
+            onChange={(e) => void onModelChange(e)}
+            title="Model applies on the next session"
+            className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-200 outline-none focus:border-emerald-500"
+          >
+            {selectedModel === null && (
+              <option value="" disabled>
+                —
+              </option>
+            )}
+            {MODEL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {modelHint && (
+            <span className="mt-0.5 text-[10px] text-zinc-500">
+              applies to next session
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => void restartConversation()}
+          title="Start a fresh conversation for this module"
+          className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:border-emerald-700 hover:text-emerald-400"
+        >
+          Restart conversation
+        </button>
         <span className={`text-sm font-medium ${STATUS_STYLE[status.state].cls}`}>
           {STATUS_STYLE[status.state].label}
         </span>
@@ -143,40 +218,67 @@ export function Session({ slug, title, onBack }: SessionProps) {
           )}
 
           {transcript.map((turn, i) => {
+            // Insert an "— earlier —" divider once, between the last history
+            // turn and the first live turn (only when both kinds are present).
+            const prev = transcript[i - 1]
+            const divider =
+              !turn.history && prev?.history ? (
+                <div
+                  key={`divider-${i}`}
+                  className="my-2 text-center text-xs tracking-wide text-zinc-600"
+                >
+                  — earlier —
+                </div>
+              ) : null
+            const dim = turn.history ? 'opacity-60' : ''
+
             if (turn.kind === 'activity') {
               return (
-                <div
-                  key={i}
-                  className="font-mono text-xs text-zinc-500 italic"
-                >
-                  {turn.text}
-                </div>
-              )
-            }
-            if (turn.kind === 'learner') {
-              return (
-                <div key={i} className="flex justify-end">
-                  <div className="max-w-[80%] rounded-2xl rounded-br-sm border border-emerald-800/60 bg-emerald-950/30 px-4 py-2 text-sm whitespace-pre-wrap text-zinc-100">
+                <div key={i}>
+                  {divider}
+                  <div className={`font-mono text-xs text-zinc-500 italic ${dim}`}>
                     {turn.text}
                   </div>
                 </div>
               )
             }
+            if (turn.kind === 'learner') {
+              return (
+                <div key={i}>
+                  {divider}
+                  <div className={`flex justify-end ${dim}`}>
+                    <div className="max-w-[80%] rounded-2xl rounded-br-sm border border-emerald-800/60 bg-emerald-950/30 px-4 py-2 text-sm whitespace-pre-wrap text-zinc-100">
+                      {turn.text}
+                    </div>
+                  </div>
+                </div>
+              )
+            }
             return (
-              <div
-                key={i}
-                className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-5 py-3"
-              >
-                <Markdown>{turn.text}</Markdown>
+              <div key={i}>
+                {divider}
+                <div
+                  className={`rounded-2xl border border-zinc-800 bg-zinc-900/50 px-5 py-3 ${dim}`}
+                >
+                  <Markdown>{turn.text}</Markdown>
+                </div>
               </div>
             )
           })}
 
           {streaming && (
-            <div className="rounded-2xl border border-emerald-900/50 bg-zinc-900/50 px-5 py-3">
-              <Markdown>{streaming}</Markdown>
-              <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-emerald-400 align-middle" />
-            </div>
+            <>
+              {transcript.length > 0 &&
+                transcript.every((t) => t.history) && (
+                  <div className="my-2 text-center text-xs tracking-wide text-zinc-600">
+                    — earlier —
+                  </div>
+                )}
+              <div className="rounded-2xl border border-emerald-900/50 bg-zinc-900/50 px-5 py-3">
+                <Markdown>{streaming}</Markdown>
+                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-emerald-400 align-middle" />
+              </div>
+            </>
           )}
         </div>
       </div>

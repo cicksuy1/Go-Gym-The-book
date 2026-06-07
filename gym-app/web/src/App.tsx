@@ -14,12 +14,17 @@ type Route =
 
 function Shell() {
   const [route, setRoute] = useState<Route>({ name: 'dashboard' })
-  const { celebrate, clearCelebrate, resetTranscript, onModuleComplete } =
+  const { celebrate, clearCelebrate, resetTranscript, loadHistory, onModuleComplete } =
     useTutor()
 
   const openModule = (slug: string, title: string): void => {
     resetTranscript()
-    void api.sessionStart(slug)
+    // Replay past chat first, then kick off the live conversation; live SSE
+    // events append after the history. Navigation isn't blocked on either.
+    void (async () => {
+      await loadHistory(slug)
+      await api.sessionStart(slug)
+    })()
     setRoute({ name: 'session', slug, title })
   }
 
