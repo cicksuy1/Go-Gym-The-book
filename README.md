@@ -18,12 +18,14 @@ storytelling** of [the Rust Book](https://doc.rust-lang.org/book/).
 - You've bounced off terse tutorials and want the *why* before the *how*.
 - You learn by building, not by watching.
 
-## How it works — three layers
+## How it works — three layers (plus an optional GUI)
 
 1. **A book** ([read online](https://cicksuy1.github.io/Go-Gym-The-book/) — `book/`, built with [mdBook](https://rust-lang.github.io/mdBook/)) — one why-first chapter per concept.
 2. **Exercises** (one Go package per module) — each ships a failing test you make pass.
 3. **An AI conductor** (`AGENTS.md`) — runs you through it: explains, gates on real `go test` results,
    quizzes you, tracks progress, and keeps the pace sane so you don't burn out.
+4. **(Optional) The Gym GUI** ([`gym-app/`](gym-app/README.md)) — a local web app that puts the same
+   conductor conversation in your browser, with streaming replies, live progress, and celebrations.
 
 Every module follows the same loop: **why-first → tiny example → make the test green → recall quiz →
 real code in the wild.**
@@ -70,10 +72,16 @@ cp progress/PROGRESS.template.md progress/PROGRESS.local.md
 Your agent reads `AGENTS.md`, sees you're at Module 1, and begins. From then on: `continue`, `next`,
 `test me`, `where am I`, `I'm stuck`, or `add an exercise`.
 
-### Three ways to start
+### Four ways to start
 - **Any agent:** it auto-reads `AGENTS.md`; just say *"start the Go Gym."*
 - **Claude Code:** run the **`/go-gym`** skill — it shows where you are and drives the next module.
+- **Prefer a GUI?** `task setup && task app`, then open `http://localhost:4600` for the tutor chat —
+  see [`gym-app/README.md`](gym-app/README.md).
 - **Prefer reading first?** Follow this README, `mdbook serve book`, and let your agent take it from there.
+
+> 🛠️ A [`Taskfile.yml`](Taskfile.yml) covers the common commands — `task --list` shows them all
+> (`task up` serves the book **and** the GUI together; `task test SLUG=arrays` runs one module's rep).
+> Needs [go-task](https://taskfile.dev/installation/).
 
 ## Curriculum & progress
 
