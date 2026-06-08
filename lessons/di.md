@@ -25,9 +25,13 @@ By the end of this chapter you'll be able to:
 3. Tell the story of **why** a hard-wired `fmt.Printf` is untestable — not because someone said so,
    but because you watched the output land somewhere the test couldn't see.
 4. Write one function and drive it from a test, a terminal, and an HTTP server with zero changes.
+5. Answer the question everyone asks next — *if several types satisfy one interface, how does Go
+   know which one to run?* — and put a name to it: **dynamic dispatch**.
+6. Define your **own** one-method interface (not just borrow a standard-library one) and inject it.
 
 A couple of new faces show up — `io.Writer`, `bytes.Buffer`, `fmt.Fprintf` — but they all hang off
-**one mental picture** we build first and keep for the whole chapter.
+**one mental picture** we build first and keep for the whole chapter. Halfway through we'll define
+our own socket — a `Notifier` — to prove the idea was never about `io.Writer` in the first place.
 
 ---
 
@@ -147,6 +151,16 @@ dependency injection is **passing an argument**.
 **Checkpoint:** a function that *reaches for* its dependency picks the destination for you and
 hides its output from your tests; a function that takes an `io.Writer` lets the caller plug one
 in. The socket is the whole idea.
+
+One more thing that picture quietly hides — and it's the question everyone asks next. When the
+caller plugs `os.Stdout` in, the `writer` parameter doesn't just hold *"a destination."* It
+remembers *which concrete type* went in — a `*os.File` this time, a `*bytes.Buffer` the next —
+carried alongside the value itself. So when `Greet` runs `writer.Write(...)`, Go looks at the type
+riding inside `writer` and calls *that type's* `Write`. The choice is made while the program runs,
+not when it compiles — the name for that is **dynamic dispatch**. *(Under the hood an interface
+value is a pair: the concrete type plus the value — and that pairing is exactly how the call finds
+the right method.)* It stays abstract here because both plugs do the same job; you'll *feel* it in a
+moment, when two of your own types answer the same call differently.
 
 ---
 
@@ -301,6 +315,137 @@ web response. You wrote one function and let the caller choose the destination.
 
 ---
 
+## A socket you define yourself: `Notifier`
+
+So far the socket has been `io.Writer` — the standard library's, handed to us ready-made. That's
+convenient for learning, but it can also mislead: it's easy to walk away thinking dependency
+injection is an `io.Writer` *thing*, tangled up with bytes and `Write` and `&buf`. It isn't. DI is a
+*shape-of-function* idea, and the surest way to see that is to throw `io.Writer` away and build a
+socket of your own — one with no bytes in sight.
+
+Say a program registers users and wants to welcome them. The welcome might go out by email, or by
+SMS, or by something not invented yet. So we don't hard-wire *how* — we define the capability and
+ask for it:
+
+```go
+package main
+
+import "fmt"
+
+// The contract — anything that can notify.
+type Notifier interface {
+	Notify(message string)
+}
+
+// One real implementation — sends an email.
+type EmailNotifier struct{}
+
+func (e EmailNotifier) Notify(msg string) {
+	fmt.Println("Sending email:", msg)
+}
+
+// Another real implementation — sends an SMS.
+type SMSNotifier struct{}
+
+func (s SMSNotifier) Notify(msg string) {
+	fmt.Println("Sending SMS:", msg)
+}
+
+// The function — doesn't care HOW you notify, just that you can.
+func RegisterUser(name string, notifier Notifier) {
+	// ... registration logic ...
+	notifier.Notify("Welcome, " + name + "!")
+}
+
+func main() {
+	RegisterUser("Alice", EmailNotifier{})
+	RegisterUser("Bob", SMSNotifier{})
+}
+```
+
+```text
+Sending email: Welcome, Alice!
+Sending SMS: Welcome, Bob!
+```
+
+Same `Greet` move, zero bytes: `RegisterUser` exposes a socket shaped like `Notifier`, and the
+caller plugs in whichever notifier it wants. `RegisterUser` writes its welcome and never learns
+which channel carried it.
+
+### How does it *know* which one to run?
+
+Here's the question that trips everyone — worth asking out loud. `RegisterUser` was compiled long
+before that first line of `main` ever named `EmailNotifier`. Its body says only `notifier.Notify(…)`.
+So when it runs, **how does it know to send an email for Alice and an SMS for Bob?**
+
+This is the dynamic dispatch from the big idea, now standing in front of you. The `notifier`
+parameter carries whichever concrete type the caller passed — `EmailNotifier` for Alice,
+`SMSNotifier` for Bob — riding along inside the interface value. When `RegisterUser` calls
+`notifier.Notify(…)`, Go follows that carried-along type to *its* `Notify` method, and runs that one.
+The same line of code reaches two different methods on two different calls, decided each time at
+runtime by what was plugged in.
+
+> You never chose the implementation *inside* `RegisterUser`. The caller chose it, and Go
+> remembered. That's the whole trick: the function commits to the *capability*, the caller commits
+> to the *implementation*, and dispatch wires them together while the program runs.
+
+### No `implements` — having the method *is* the membership
+
+Notice what's missing. Neither `EmailNotifier` nor `SMSNotifier` says anywhere that it's a
+`Notifier`. There's no declaration of intent. Compare a language like Java, where the type has to
+announce the relationship up front:
+
+```java
+// Java: you must declare it
+class EmailNotifier implements Notifier { … }
+```
+
+```go
+// Go: there is no "implements". Having the method IS implementing it.
+type EmailNotifier struct{}
+func (e EmailNotifier) Notify(msg string) { … }   // ← this method, and nothing else, makes it a Notifier
+```
+
+This is chapter 4's headline doing real work — *if it has the methods, it IS the interface.*
+`EmailNotifier` became a `Notifier` the instant it had a `Notify(string)` method, with no ceremony
+and no link back to the interface. That's why you can make a type from someone else's package
+satisfy *your* interface: the interface only ever asked for a method, not a promise.
+
+And to head off a common mix-up: this is **not** generics. There's no `[T any]`, no type parameter —
+`RegisterUser` takes one fixed interface that many concrete types happen to satisfy. (Generics —
+writing one function over *many* types via type parameters — are a later chapter and a different
+tool.) What you're seeing here is **interface polymorphism**: one socket, many plugs.
+
+### Making it testable — the same move, one level deeper
+
+There's a quiet flaw in that tidy example, and it's the very flaw this chapter opened with.
+`EmailNotifier.Notify` reaches straight for the screen with `fmt.Println` — exactly the hard-wiring
+that made the first `Greet` impossible to test. Hand `RegisterUser` an `EmailNotifier` in a test and
+the welcome prints to the console, where the test can't read it back.
+
+The fix is the move you already know: don't let the notifier reach for `os.Stdout` — *inject* the
+destination too. Give each notifier an `io.Writer` to write to:
+
+```go
+type EmailNotifier struct{ Out io.Writer }
+
+func (e EmailNotifier) Notify(msg string) {
+	fmt.Fprintln(e.Out, "Sending email:", msg)
+}
+```
+
+Now a test can hand in a `bytes.Buffer` as `Out`, run `RegisterUser`, and read back exactly what was
+sent — the same buffer trick that made `Greet` testable, nested one level in. The exercise's
+notifiers are written this way, and that's how their test reads them. Two sockets stacked: inject
+*which* notifier, and inject *where it writes*.
+
+**Checkpoint:** this time you defined the socket (`Notifier`), two of your own types fit it just by
+having the method, and the caller picked the plug — Go dispatched `Notify` to the right one at
+runtime. Swap `fmt.Println` for an injected `io.Writer` and the whole thing is testable with a plain
+buffer. No bytes were required to understand any of it; DI was never about `io.Writer`.
+
+---
+
 ## Prove it with a test
 
 Here's the actual test from `exercises/di/di_test.go` — the very journey from the big idea, now in
@@ -347,12 +492,21 @@ in.
 The test file also carries an `ExampleGreet` — the example-that-doubles-as-documentation pattern
 from chapter 1 — asserting that greeting `"world"` into a buffer reads back `Hello, world`.
 
+`TestRegisterUser` works the exact same way, which is the point. It builds an `EmailNotifier` (then
+an `SMSNotifier`) with its `Out` set to a `bytes.Buffer`, runs `RegisterUser("Alice", …)`, and reads
+the buffer back — no console capture, no fake, just the buffer. And because it runs the *same*
+`RegisterUser` call through both notifiers and checks that the email case reads `Sending email: …`
+while the SMS case reads `Sending SMS: …`, the test is literally watching dynamic dispatch pick the
+right method. The clean test is, again, the reward for injecting instead of hard-wiring.
+
 ---
 
 ## 🏋️ Your rep — make it GREEN
 
-Right now `di.go` has an empty body on purpose — it writes nothing, so the test sees `""` instead
-of `"Hello, world"` (that's the RED state):
+This chapter has **two** small functions to fill in, one for each socket you met.
+
+**Rep 1 — `Greet` (the `io.Writer` socket).** Right now `di.go` has an empty body on purpose — it
+writes nothing, so the test sees `""` instead of `"Hello, world"` (that's the RED state):
 
 ```go
 func Greet(writer io.Writer, name string) {
@@ -371,6 +525,21 @@ Your job, in plain language:
 That's the entire function — one line. The lesson isn't the line; it's *why* the writer is a
 parameter. You're filling in the socket's one job: write the bytes to whatever is plugged in.
 
+**Rep 2 — `RegisterUser` (your own `Notifier` socket).** The same shape, no bytes. The `Notifier`
+interface and the two notifiers (`EmailNotifier`, `SMSNotifier`, each writing to an injected
+`io.Writer`) are written for you; `RegisterUser` is the empty one:
+
+```go
+func RegisterUser(name string, notifier Notifier) {
+	// TODO(you): send "Welcome, <name>!" through the notifier (hint: notifier.Notify)
+}
+```
+
+Your job: inside `RegisterUser`, call `notifier.Notify` with the string `"Welcome, " + name + "!"`.
+One line again. The test runs your `RegisterUser` through *both* notifiers and checks that the email
+case reads back `Sending email: Welcome, Alice!` and the SMS case `Sending SMS: …` — so the moment it
+goes GREEN, you've watched dynamic dispatch send one call to two different methods.
+
 ### Stretch goals (ask your tutor to scaffold any)
 
 - Write a `main` that calls `Greet(os.Stdout, "world")` so you see it print for real.
@@ -378,6 +547,8 @@ parameter. You're filling in the socket's one job: write the bytes to whatever i
   with `http.ListenAndServe`, and hit it with your browser — the same function, now answering HTTP.
 - Change your `Fprintf` to `Fprintln` and run the test. Watch which case goes red, and explain why
   — then change it back. (A safe way to *feel* how precisely the empty-name case pins the format.)
+- Add a third notifier of your own (a `ConsoleNotifier`, say) and pass it to `RegisterUser` without
+  touching `RegisterUser` at all — the proof that the socket is open to plugs it's never heard of.
 
 ---
 
@@ -395,6 +566,11 @@ parameter. You're filling in the socket's one job: write the bytes to whatever i
    `Greet(os.Stdout, …)` won't compile. Why — and what's the rule that prevents it?
 6. What's the relationship between `fmt.Printf` and `fmt.Fprintf`? Say (or write) the one line that
    makes `Greet` write `"Hello, "+name` to its writer.
+7. You pass `EmailNotifier{}` to `RegisterUser`, and later `SMSNotifier{}`. The body of
+   `RegisterUser` never changes. How does Go know to run the *email* `Notify` one time and the *SMS*
+   `Notify` the next — and what's that mechanism called?
+8. Go has no `implements` keyword. So what, exactly, makes `EmailNotifier` count as a `Notifier` —
+   and why does that let a type from someone else's package satisfy an interface you wrote?
 
 If any answer is fuzzy, scroll back up — that's the recall doing its job.
 
@@ -435,8 +611,14 @@ serves most of the Go web.
   works in the test and breaks in `main`.
 - **`fmt.Fprintf`** is `Printf` plus a destination; `Printf` is the special case that picked
   `os.Stdout` for you — literally, in its one-line body.
+- DI was never an **`io.Writer`** trick. You defined your *own* one-method socket — `Notifier` — and
+  injected it the same way; the standard library's interfaces and yours work by identical rules.
+- When several types satisfy one interface, Go decides *which* method to run **at runtime**, from the
+  concrete type the caller plugged in — **dynamic dispatch**. The caller picks the implementation;
+  the function only ever commits to the capability.
 
-✅ **Done when:** `go test ./exercises/di/` is GREEN and you can answer the six recall questions.
+✅ **Done when:** `go test ./exercises/di/` is GREEN (both `Greet` and `RegisterUser`) and you can
+answer the eight recall questions.
 
 **Next:** Chapter 8 — *Mocking*, where we inject a dependency that does *nothing* — a stand-in we
 control — so we can test code that would otherwise be slow, flaky, or talk to the real world.
