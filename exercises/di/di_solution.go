@@ -11,3 +11,7 @@ import (
 func Greet(writer io.Writer, name string) {
 	fmt.Fprintf(writer, "Hello, %s", name)
 }
+
+func RegisterUser(name string, notifier Notifier) {
+	notifier.Notify("Welcome, " + name + "!")
+}

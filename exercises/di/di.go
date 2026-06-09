@@ -12,3 +12,12 @@ import "io"
 func Greet(writer io.Writer, name string) {
 	// TODO(you): write "Hello, "+name to writer (hint: fmt.Fprintf)
 }
+
+// RegisterUser welcomes a new user through whatever Notifier it is handed.
+//
+// The Notifier is INJECTED: RegisterUser doesn't care HOW the welcome is
+// delivered (email, SMS, …), only that it CAN be. Right now the body is empty,
+// so nothing is delivered (that's the RED state).
+func RegisterUser(name string, notifier Notifier) {
+	// TODO(you): send "Welcome, <name>!" through the notifier (hint: notifier.Notify)
+}
