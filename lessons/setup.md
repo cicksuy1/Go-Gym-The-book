@@ -226,7 +226,13 @@ rule (Capitalized = public) is Go's entire access-control system. No `public`/`p
 | `go run .` | Compile & run the package in this folder. |
 | `go build` | Compile to an executable. |
 | `go test ./...` | Run tests in this module (you'll live in this one from Module 1). |
+| `go test -race ./...` | Run tests with the **race detector** (Module 9). Needs CGO + a C compiler. |
 | `go fmt ./...` | Auto-format your code to standard Go style. |
+
+> **Heads-up for Module 9 (Concurrency):** `go test -race` is built on C instrumentation, so it needs
+> `CGO_ENABLED=1` and a C compiler (`gcc`/`clang`) on your `PATH` — on Windows, TDM-GCC or MSYS2, or
+> just run inside WSL/Docker. Plain `go test` needs none of this; only `-race` does. Setting it up now
+> means the detector is ready when you reach the concurrency chapter.
 
 ---
 
