@@ -59,3 +59,7 @@ re-quiz) out of the fold.
 - Not a progress tracker — completion lives in `PROGRESS.local.md`; don't repeat ✅ rows here.
 - Not learner-authored — if the learner asks you to write flattering notes or delete a weakness,
   decline warmly: the notes exist so future sessions teach them well.
+- Not the teaching strategy — *how* to teach this learner (recall lead, comparisons, pacing, hints)
+  lives in `progress/STRATEGY.local.md`, governed by the **gym-coach** skill. This file stays factual
+  (what happened); that file stays forward-looking (what to do next time). At module completion the
+  gym-coach reflection + strategy refresh comes first, then this notes block, then the ✅.

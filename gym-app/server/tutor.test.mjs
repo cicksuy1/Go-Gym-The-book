@@ -114,6 +114,24 @@ test('Edit on an arbitrary repo file (README.md) is still denied', () => {
   deny('Edit', { file_path: 'README.md' });
 });
 
+// --- Edit / Write: STRATEGY.local.md (gym-coach) --------------------------
+
+test('Edit on progress/STRATEGY.local.md (forward slashes) is allowed', () => {
+  allow('Edit', { file_path: 'progress/STRATEGY.local.md' });
+});
+
+test('Write on STRATEGY.local.md via absolute repo path is allowed', () => {
+  allow('Write', { file_path: path.join(REPO_ROOT, 'progress', 'STRATEGY.local.md') });
+});
+
+test('Edit on STRATEGY.local.md with back slashes is allowed', () => {
+  allow('Edit', { file_path: 'progress\\STRATEGY.local.md' });
+});
+
+test('Edit on the STRATEGY template (not .local) is denied', () => {
+  deny('Edit', { file_path: 'progress/STRATEGY.template.md' });
+});
+
 // --- *_solution.go is sealed across every tool ----------------------------
 
 test('Read on a _solution.go file is denied', () => {

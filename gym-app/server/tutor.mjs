@@ -22,6 +22,8 @@ const REPO_ROOT = path.resolve(__dirname, '../..');
 const SESSION_FILE = path.join(__dirname, '..', '.session.json');
 const PROGRESS_FILE = path.resolve(REPO_ROOT, 'progress', 'PROGRESS.local.md');
 const NOTES_FILE = path.resolve(REPO_ROOT, 'progress', 'NOTES.local.md');
+// Per-learner teaching strategy, owned by the gym-coach skill (gitignored).
+const STRATEGY_FILE = path.resolve(REPO_ROOT, 'progress', 'STRATEGY.local.md');
 
 // --- tuning constants -------------------------------------------------------
 const HEARTBEAT_MS = 25_000;
@@ -170,11 +172,21 @@ function evaluateBash(input) {
 function evaluateEdit(input) {
   const filePath = typeof input.file_path === 'string' ? input.file_path : '';
   if (!filePath) {
-    return { behavior: 'deny', message: 'the conductor may only write PROGRESS.local.md or NOTES.local.md' };
+    return {
+      behavior: 'deny',
+      message: 'the conductor may only write PROGRESS.local.md, NOTES.local.md, or STRATEGY.local.md',
+    };
   }
   const resolved = path.resolve(REPO_ROOT, filePath);
-  if (!samePath(resolved, PROGRESS_FILE) && !samePath(resolved, NOTES_FILE)) {
-    return { behavior: 'deny', message: 'the conductor may only write PROGRESS.local.md or NOTES.local.md' };
+  if (
+    !samePath(resolved, PROGRESS_FILE) &&
+    !samePath(resolved, NOTES_FILE) &&
+    !samePath(resolved, STRATEGY_FILE)
+  ) {
+    return {
+      behavior: 'deny',
+      message: 'the conductor may only write PROGRESS.local.md, NOTES.local.md, or STRATEGY.local.md',
+    };
   }
   return { behavior: 'allow', updatedInput: input };
 }
@@ -607,8 +619,9 @@ export async function startTutor() {
 export function notifyModuleComplete(slug) {
   if (!host || host.state === 'dead') return;
   host.queue.push(
-    `Module ${slug} is complete — write your gym-memory notes for it to ` +
-      `progress/NOTES.local.md now (see the gym-memory skill), then continue.`,
+    `Module ${slug} is complete — run the gym-coach close-out now (see the gym-coach skill): ` +
+      `ask the learner the short reflection, refresh progress/STRATEGY.local.md, and write your ` +
+      `gym-memory notes block to progress/NOTES.local.md (see the gym-memory skill), then continue.`,
   );
 }
 
@@ -651,9 +664,10 @@ tutorRouter.post('/session/start', async (req, res) => {
     );
   } else {
     h.queue.push(
-      `The learner opened module ${slug} in the GUI — read progress/NOTES.local.md and ` +
-        `progress/PROGRESS.local.md, apply the gym-memory skill, then run the AGENTS.md ` +
-        `Tutor-mode loop on it. Remember: your markdown is rendered directly to them.`,
+      `The learner opened module ${slug} in the GUI — read progress/NOTES.local.md, ` +
+        `progress/PROGRESS.local.md, and progress/STRATEGY.local.md; apply the gym-memory and ` +
+        `gym-coach skills (let the strategy set your recall lead, comparisons, pacing, and hints), ` +
+        `then run the AGENTS.md Tutor-mode loop on it. Remember: your markdown is rendered directly to them.`,
     );
   }
   res.status(202).json({ success: true, data: { accepted: true }, error: null });
