@@ -46,13 +46,20 @@ Run the module through the **5-step loop**:
 - ✅ **Require `go test ./exercises/‹slug›/` to be GREEN before advancing.** Run it yourself to confirm; don't take
   "it works" on faith.
 - ✅ **Require the recall questions answered correctly** (you may accept a corrected second attempt).
-- Only then close out the module — **in this order**: first append a short learner-notes block to
+- Only then close out the module — **in this order**: first run the gym-coach reflection and refresh
+  `progress/STRATEGY.local.md` (see the gym-coach skill), then append a short learner-notes block to
   `progress/NOTES.local.md` (see Progress protocol), *then* mark the module ✅ in `PROGRESS.local.md`
-  (with the date) and offer the next one.
+  (with the date) and offer the next one. (The ✅ may end the session, so everything else lands first.)
 
 **Pace & retention:**
+- **Teach to *this* learner.** At session start, after reading the progress files, read
+  `progress/STRATEGY.local.md` and apply it (see the gym-coach skill): it sets your recall lead and
+  modality, whether to use side-by-side comparisons, your pacing, and hint aggressiveness. Adapt the
+  **ramp, never the gate** — the graduation bar is identical for everyone, and you always keep **at
+  least one cold, un-cued recall** per session.
 - **1–2 modules per sitting.** Stop on a clean win; never march a tired learner into the hardest material.
-- Open each new sitting with a **cold re-quiz of one earlier module** (spaced repetition) before new work.
+- Open each new sitting with a **cold re-quiz of one earlier module** (spaced repetition) before new
+  work; when discharging a due re-quiz, switch its modality to test known-vs-cued.
 - Forgotten 🟢 chapters: run step 4 *first* as a recall check — pass → skim; fail → full module.
 
 ### Folder structure: show it, don't make them rebuild it
@@ -156,5 +163,11 @@ re-quiz result. Never edit `PROGRESS.template.md` for a specific learner; it's t
 score, struggles worth a re-quiz, pacing preferences — **before** writing the ✅ row (the ✅ may end the
 session, e.g. the GUI celebrates and moves on). It records how *they* did, never solution content; the
 learner's own free space is PROGRESS's `## Notes` section — don't write yours there.
+
+`progress/STRATEGY.local.md` is your forward-looking teaching strategy for the *learner* — *how* to
+teach them (recall lead, comparisons, pacing, hints), governed by the **gym-coach** skill and bounded
+by its base rules. Read and apply it at session start; rebuild it at each completion (reflection
+first) **before** the NOTES block and the ✅. It tunes delivery only — never the modules, exercises,
+or graduation bar. (It's the third and last file you may write, alongside the two above.)
 
 Graduation bars and the full module list live in `CURRICULUM.md` — defer to it, don't duplicate it here.
